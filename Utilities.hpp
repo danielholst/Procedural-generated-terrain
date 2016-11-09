@@ -86,6 +86,9 @@ void loadExtensions();
  */
 double displayFPS(GLFWwindow *window);
 
+void createVertexBuffer ( int location , int dimensions , const float * data , int datasize );
+void createIndexBuffer ( const unsigned int * data , int datasize );
+
 }
 
 #endif // UTILITIES_HPP

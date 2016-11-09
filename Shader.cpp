@@ -55,11 +55,9 @@ void Shader::createShader(const char *vertexshaderfile, const char *fragmentshad
 
     // Create the vertex shader.
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    std::cout << "hej" << std::endl;
 
     vertexShaderAssembly = readShaderFile(vertexshaderfile);
     if(vertexShaderAssembly) { // Don't try to use a NULL pointer
-        std::cout << "hej" << std::endl;
         vertexShaderStrings[0] = (char*)vertexShaderAssembly;
         glShaderSource(vertexShader, 1, vertexShaderStrings, NULL);
         glCompileShader(vertexShader);

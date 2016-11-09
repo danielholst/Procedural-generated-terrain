@@ -25,6 +25,9 @@
 #include "TriangleSoup.hpp"
 #include "Utilities.hpp"
 #include "Shader.hpp"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/transform.hpp"
 
 // In MacOS X, tell GLFW to include the modern OpenGL headers.
 // Windows does not want this, so we make this Mac-only.
@@ -45,17 +48,18 @@ int main(int argc, char *argv[]) {
 	int width = 800;
     int height = 600;
 
+    // shaders
     Shader planeShader;
-
-    GLuint vertexArrayID , vertexBufferID , indexBufferID;
-    const GLfloat vertex_array_data [] = {
-    -1.0f , -1.0f , 0.0f , // First vertex , xyz
-    1.0f , -1.0f , 0.0f , // Second vertex , xyz
-    0.0f , 1.0f , 0.0f // Third vertex , xyz
-    };
-    const GLuint index_array_data [] = {
-    0 ,1 ,2
-    };
+    // ID
+    GLint location_time;
+    
+    //objects
+    TriangleSoup sphere;
+    // time
+    float time;    
+    
+    glm::vec3 myRotationAxis;
+    glm::mat4 rotMat;
 
     const GLFWvidmode *vidmode;  // GLFW struct to hold information about the display
 	GLFWwindow *window;    // GLFW struct to hold information about the window
@@ -87,38 +91,13 @@ int main(int argc, char *argv[]) {
     glfwMakeContextCurrent(window);
 
     planeShader.createShader("planeShaderVert.glsl", "planeShaderFrag.glsl");
+    sphere.createSphere(0.3, 20);
 
-    // Generate 1 Vertex array object , put the resulting identifier in vertexArrayID
-    glGenVertexArrays (1 , &vertexArrayID );
-    // Activate the vertex array object
-    glBindVertexArray ( vertexArrayID ) ;
-    // Generate 1 buffer , put the resulting identifier in vertexBufferID
-    glGenBuffers (1 , &vertexBufferID );
-    // Activate the vertex buffer object
-    glBindBuffer ( GL_ARRAY_BUFFER , vertexBufferID );
-    // Present our vertex coordinates to OpenGL
-    glBufferData ( GL_ARRAY_BUFFER , sizeof ( vertex_array_data ) ,
-    vertex_array_data , GL_STATIC_DRAW ) ;
-    // Specify the format of the data in the vertex buffer , and copy the data .
-    // The six arguments specify , from left to right :
-    // Attribute 0, must match the " layout " statement in the shader .
-    // Dimensions 3, means 3D (x,y,z) - this becomes a vec3 in the shader .
-    // Type GL_FLOAT , means we have " float " input data in the array .
-    // GL_FALSE means "no normalization ". This has no meaning for float data .
-    // Stride 0, meaning (x,y,z) values are packed tightly together without gaps .
-    // Array buffer offset 0 means our data starts at the first element .
-    glVertexAttribPointer (0 , 3 , GL_FLOAT , GL_FALSE , 0, NULL );
-    // Enable vertex attribute array 0 to send xyz coordinates to the shader .
-    glEnableVertexAttribArray (0) ;
-    // Generate 1 buffer , put the resulting identifier in indexBufferID
-    glGenBuffers (1 , &indexBufferID );
-    // Activate ( bind ) the index buffer and copy data to it.
-    glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER , indexBufferID );
-    // Present our vertex indices to OpenGL
-    glBufferData ( GL_ELEMENT_ARRAY_BUFFER , sizeof ( index_array_data ) ,
-    index_array_data , GL_STATIC_DRAW );
-    // Deactivate the vertex array object again to be nice
-    glBindVertexArray (0) ;
+    // send time to shader
+    location_time = glGetUniformLocation(planeShader.programID, "time");
+    if( location_time == -1) { // If the variable is not found , -1 is returned
+        cout << " Unable to locate variable ✬time ✬ in shader !" << endl ;
+    }
 
 
     // Show some useful information on the GL context
@@ -140,16 +119,24 @@ int main(int argc, char *argv[]) {
 		// Set the clear color and depth, and clear the buffers for drawing
         glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        //glEnable(GL CULL FACE);
         /* ---- Rendering code should go here ---- */
 		Utilities :: displayFPS ( window );
-
+        time = (float)glfwGetTime(); // Number of seconds since the program was started
+        
         // activate shader
         glUseProgram(planeShader.programID);
 
-        glBindVertexArray ( vertexArrayID );
-        glDrawElements ( GL_TRIANGLES , 3, GL_UNSIGNED_INT , NULL );
+        //glBindVertexArray ( vertexArrayID );
+        //lDrawElements ( GL_TRIANGLES , 3, GL_UNSIGNED_INT , NULL );
+        sphere.render();
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        
+        glUniform1f(location_time , time); // Copy the value to the shader program
 
+        myRotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
+        //rotMat = glm::rotate(2*3.14*time, myRotationAxis);
+        //glUniform4f()
         // Swap buffers, i.e. display the image and prepare for next frame.
         glfwSwapBuffers(window);
 

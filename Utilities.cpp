@@ -158,7 +158,7 @@ double Utilities::displayFPS(GLFWwindow *window) {
     {
         fps = (double)frames / (t-t0);
         if(frames > 0) frametime = 1000.0 * (t-t0) / frames;
-        sprintf(titlestring, "TNM046, %.2f ms/frame (%.1f FPS)", frametime, fps);
+        sprintf(titlestring, "Scene, %.2f ms/frame (%.1f FPS)", frametime, fps);
         glfwSetWindowTitle(window, titlestring);
         // printf("Speed: %.1f FPS\n", fps);
         t0 = t;
@@ -166,4 +166,30 @@ double Utilities::displayFPS(GLFWwindow *window) {
     }
     frames ++;
     return fps;
+}
+
+void Utilities::createVertexBuffer ( int location , int dimensions , const float * data , int datasize )
+{
+    GLuint bufferID ;
+    // Generate buffer , activate it and copy the data
+    glGenBuffers (1 , & bufferID );
+    glBindBuffer ( GL_ARRAY_BUFFER , bufferID ) ;
+    glBufferData ( GL_ARRAY_BUFFER , datasize , data , GL_STATIC_DRAW );
+    // Tell OpenGL how the data is stored in our buffer
+    // Attribute location ( must match layout ( location =#) statement in shader )
+    // Number of dimensions (3 -> vec3 in the shader , 2-> vec2 in the shader ),
+    // type GL_FLOAT , not normalized , stride 0, start at element 0
+    glVertexAttribPointer ( location , dimensions , GL_FLOAT , GL_FALSE , 0, NULL ) ;
+    // Enable the attribute in the currently bound VAO
+    glEnableVertexAttribArray ( location ) ;
+}
+void Utilities::createIndexBuffer ( const unsigned int * data , int datasize )
+{
+    GLuint bufferID ;
+    // Generate buffer , activate it and copy the data
+    glGenBuffers (1 , & bufferID );
+    // Activate ( bind ) the index buffer and copy data to it.
+    glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER , bufferID );
+    // Present our vertex indices to OpenGL
+    glBufferData ( GL_ELEMENT_ARRAY_BUFFER , datasize , data , GL_STATIC_DRAW ) ;
 }

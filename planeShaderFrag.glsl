@@ -1,6 +1,11 @@
 #version 330 core
 
+
+
+in vec3 interpolatedNormal;
+in vec2 st;
+
 out vec4 finalcolor;
 void main () {
-	finalcolor = vec4 (1.0 , 0.5 , 0.0 , 1.0) ;
+	finalcolor = vec4 (vec3(interpolatedNormal), 1.0) ;
 }
