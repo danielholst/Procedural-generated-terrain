@@ -28,6 +28,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/transform.hpp"
+#include "camera.hpp"
 
 // In MacOS X, tell GLFW to include the modern OpenGL headers.
 // Windows does not want this, so we make this Mac-only.
@@ -47,6 +48,15 @@ int main(int argc, char *argv[]) {
 
 	int width = 800;
     int height = 600;
+
+    //camera
+        Camera camera(glm::perspective(glm::radians(45.0f),
+                 (float)width / (float)height, 0.1f, 100.0f),
+                  glm::vec3(1, 4, 2), glm::vec3(0, 0, 0), glm::vec3(0.0f, 1.0f, 0.0f));
+
+    glm::mat4 Model = glm::mat4(1.0f);
+    glm::mat4 mvp = camera.getMVPMatrix(Model);
+    GLuint MatrixID;
 
     // shaders
     Shader planeShader;
@@ -100,6 +110,7 @@ int main(int argc, char *argv[]) {
         cout << " Unable to locate variable ✬time ✬ in shader !" << endl ;
     }
 
+    MatrixID = glGetUniformLocation(planeShader.programID, "MVP");
     location_rotMat = glGetUniformLocation(planeShader.programID, "rotMat");
 
     // Show some useful information on the GL context
@@ -139,6 +150,7 @@ int main(int argc, char *argv[]) {
         myRotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
         rotMat = glm::rotate(rotMat,0.01f, myRotationAxis);
         glUniformMatrix4fv(location_rotMat, 1, GL_FALSE, &rotMat[0][0]);
+        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
         // Swap buffers, i.e. display the image and prepare for next frame.
         glfwSwapBuffers(window);
 

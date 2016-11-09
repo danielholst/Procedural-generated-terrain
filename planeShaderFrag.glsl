@@ -1,6 +1,6 @@
 #version 330 core
 
-
+uniform float time;
 
 in vec3 interpolatedNormal;
 in vec2 st;
