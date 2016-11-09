@@ -52,6 +52,7 @@ int main(int argc, char *argv[]) {
     Shader planeShader;
     // ID
     GLint location_time;
+    GLint location_rotMat;
     
     //objects
     TriangleSoup sphere;
@@ -59,7 +60,7 @@ int main(int argc, char *argv[]) {
     float time;    
     
     glm::vec3 myRotationAxis;
-    glm::mat4 rotMat;
+    glm::mat4 rotMat (1.0f);
 
     const GLFWvidmode *vidmode;  // GLFW struct to hold information about the display
 	GLFWwindow *window;    // GLFW struct to hold information about the window
@@ -99,6 +100,7 @@ int main(int argc, char *argv[]) {
         cout << " Unable to locate variable ✬time ✬ in shader !" << endl ;
     }
 
+    location_rotMat = glGetUniformLocation(planeShader.programID, "rotMat");
 
     // Show some useful information on the GL context
     cout << "GL vendor:       " << glGetString(GL_VENDOR) << endl;
@@ -119,7 +121,7 @@ int main(int argc, char *argv[]) {
 		// Set the clear color and depth, and clear the buffers for drawing
         glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        //glEnable(GL CULL FACE);
+        glEnable(GL_CULL_FACE);
         /* ---- Rendering code should go here ---- */
 		Utilities :: displayFPS ( window );
         time = (float)glfwGetTime(); // Number of seconds since the program was started
@@ -135,8 +137,8 @@ int main(int argc, char *argv[]) {
         glUniform1f(location_time , time); // Copy the value to the shader program
 
         myRotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
-        //rotMat = glm::rotate(2*3.14*time, myRotationAxis);
-        //glUniform4f()
+        rotMat = glm::rotate(rotMat,0.01f, myRotationAxis);
+        glUniformMatrix4fv(location_rotMat, 1, GL_FALSE, &rotMat[0][0]);
         // Swap buffers, i.e. display the image and prepare for next frame.
         glfwSwapBuffers(window);
 

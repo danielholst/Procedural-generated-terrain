@@ -5,6 +5,7 @@ layout ( location =1) in vec3 Normal;
 layout ( location =2) in vec2 TexCoord;
 
 uniform float time;
+uniform mat4 rotMat;
 
 out vec3 interpolatedNormal;
 out vec2 st;
@@ -16,5 +17,5 @@ void main () {
 		
 		interpolatedNormal = Normal;
 		st = TexCoord;
-		gl_Position = vec4 ( vec3(Position.x, Position.y*sin(time), Position.z) , 1.0);
+		gl_Position = vec4 ( vec3(Position.x, Position.y, Position.z) , 1.0)*rotMat;
 }
