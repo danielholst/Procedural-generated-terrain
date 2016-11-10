@@ -49,23 +49,22 @@ int main(int argc, char *argv[]) {
 	int width = 800;
     int height = 600;
 
-    //camera
-        Camera camera(glm::perspective(glm::radians(45.0f),
-                 (float)width / (float)height, 0.1f, 100.0f),
-                  glm::vec3(1, 4, 2), glm::vec3(0, 0, 0), glm::vec3(0.0f, 1.0f, 0.0f));
-
-    glm::mat4 Model = glm::mat4(1.0f);
-    glm::mat4 mvp = camera.getMVPMatrix(Model);
-    GLuint MatrixID;
 
     // shaders
+    Shader sphereShader;
     Shader planeShader;
+    Shader noiseShader;
+
     // ID
+    GLuint sphereID;
+    GLuint planeID;
     GLint location_time;
     GLint location_rotMat;
     
     //objects
     TriangleSoup sphere;
+    TriangleSoup plane;
+
     // time
     float time;    
     
@@ -101,23 +100,41 @@ int main(int argc, char *argv[]) {
     // (This step is strictly required, or things will simply not work)
     glfwMakeContextCurrent(window);
 
+    sphereShader.createShader("sphereShaderVert.glsl", "sphereShaderFrag.glsl");
     planeShader.createShader("planeShaderVert.glsl", "planeShaderFrag.glsl");
+
     sphere.createSphere(0.3, 20);
+    plane.createBox(1.0, 0.1, 1.0);
 
     // send time to shader
-    location_time = glGetUniformLocation(planeShader.programID, "time");
+    location_time = glGetUniformLocation(sphereShader.programID, "time");
     if( location_time == -1) { // If the variable is not found , -1 is returned
         cout << " Unable to locate variable ✬time ✬ in shader !" << endl ;
     }
 
-    MatrixID = glGetUniformLocation(planeShader.programID, "MVP");
-    location_rotMat = glGetUniformLocation(planeShader.programID, "rotMat");
+    //camera
+    Camera camera(glm::perspective(glm::radians(45.0f),
+                 (float)width / (float)height, 0.1f, 100.0f),
+                  glm::vec3(2, 1, 2), glm::vec3(0, 0, 0), glm::vec3(0.0f, 1.0f, 0.0f));
+
+    glm::mat4 Model = glm::translate(glm::vec3(0, 0.5, 0));
+    glm::mat4 sphereMVP = camera.getMVPMatrix(Model);
+    
+
+    // fix plane trans TODO
+    glm::mat4 planeTrans = glm::translate(glm::vec3(0, 0, 0));
+    glm::mat4 planeMVP = camera.getMVPMatrix(planeTrans);
+
+    sphereID = glGetUniformLocation(sphereShader.programID, "MVP");
+    planeID = glGetUniformLocation(planeShader.programID, "MVP");
+    location_rotMat = glGetUniformLocation(sphereShader.programID, "rotMat");
 
     // Show some useful information on the GL context
     cout << "GL vendor:       " << glGetString(GL_VENDOR) << endl;
     cout << "GL renderer:     " << glGetString(GL_RENDERER) << endl;
     cout << "GL version:      " << glGetString(GL_VERSION) << endl;
     cout << "Desktop size:    " << width << "x" << height << " pixels" << endl;
+
 
     glfwSwapInterval(0); // Do not wait for screen refresh between frames
 
@@ -137,12 +154,16 @@ int main(int argc, char *argv[]) {
 		Utilities :: displayFPS ( window );
         time = (float)glfwGetTime(); // Number of seconds since the program was started
         
-        // activate shader
+        // draw plane
         glUseProgram(planeShader.programID);
+        plane.render();
+        glUniformMatrix4fv(planeID, 1, GL_FALSE, &planeMVP[0][0]);
 
-        //glBindVertexArray ( vertexArrayID );
-        //lDrawElements ( GL_TRIANGLES , 3, GL_UNSIGNED_INT , NULL );
+        // draw sphere
+        glUseProgram(sphereShader.programID);
         sphere.render();
+
+        // wireframe mode
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         
         glUniform1f(location_time , time); // Copy the value to the shader program
@@ -150,7 +171,8 @@ int main(int argc, char *argv[]) {
         myRotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
         rotMat = glm::rotate(rotMat,0.01f, myRotationAxis);
         glUniformMatrix4fv(location_rotMat, 1, GL_FALSE, &rotMat[0][0]);
-        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
+        glUniformMatrix4fv(sphereID, 1, GL_FALSE, &sphereMVP[0][0]);
+
         // Swap buffers, i.e. display the image and prepare for next frame.
         glfwSwapBuffers(window);
 

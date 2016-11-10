@@ -7,5 +7,5 @@ in vec2 st;
 
 out vec4 finalcolor;
 void main () {
-	finalcolor = vec4 (interpolatedNormal, 1.0) ;
+	finalcolor = vec4 (vec3(interpolatedNormal), 1.0) ;
 }
