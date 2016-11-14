@@ -29,6 +29,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/transform.hpp"
 #include "camera.hpp"
+#include "noise1234.hpp"
 
 // In MacOS X, tell GLFW to include the modern OpenGL headers.
 // Windows does not want this, so we make this Mac-only.
@@ -41,14 +42,71 @@
 
 using namespace std;
 
+int width = 800;
+int height = 600;
+
+// The software-generated texture
+GLuint location_tex;
+GLuint textureID;    
+unsigned char *pixels;
+
+void createPlaneTexture()
+{
+    glGenTextures (1, &textureID );
+    glBindTexture ( GL_TEXTURE_2D , textureID );
+    // Set parameters to determine how the texture is resized
+    glTexParameteri ( GL_TEXTURE_2D , GL_TEXTURE_MIN_FILTER , GL_LINEAR );
+    glTexParameteri ( GL_TEXTURE_2D , GL_TEXTURE_MAG_FILTER , GL_LINEAR );
+    // Set parameters to determine how the texture wraps at edges
+    glTexParameteri ( GL_TEXTURE_2D , GL_TEXTURE_WRAP_S , GL_REPEAT );
+    glTexParameteri ( GL_TEXTURE_2D , GL_TEXTURE_WRAP_T , GL_REPEAT );
+
+}
+
+void generateNoise()
+{
+    int i, j, k;
+    int red, grn, blu;
+    double x, y;
+    pixels = (unsigned char*) calloc(width*height*4, sizeof(char));
+
+    if ( location_tex != -1 ) {
+        glUniform1i ( location_tex , 0);
+    }
+
+    // Regenerate all the texture data on the CPU for every frame
+    for(i=0; i<width; i++)
+    {
+        x = (double)i / width;
+        for(j=0; j<height; j++)
+        {
+            y = (double)j / height;
+
+            // Perlin noise
+            red = 128 + 127*noise3(8.0*x, 8.0*y, (float)glfwGetTime());
+
+            // Set red=grn=blu for grayscale image
+            grn = red;
+            blu = red;
+
+            k = (i + j*width)*4;
+            pixels[k] = red/3;
+            pixels[k + 1] = grn/3;
+            pixels[k + 2] = blu/3;
+            pixels[k + 3] = 255;
+        }
+    }
+
+    // Upload the texture data to the GPU
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width,
+                     height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+}
+
+
 /*
  * main(argc, argv) - the standard C++ entry point for the program
  */
 int main(int argc, char *argv[]) {
-
-	int width = 800;
-    int height = 600;
-
 
     // shaders
     Shader sphereShader;
@@ -64,9 +122,10 @@ int main(int argc, char *argv[]) {
     //objects
     TriangleSoup sphere;
     TriangleSoup plane;
+    TriangleSoup terrain;
 
     // time
-    float time;    
+    float time;  
     
     glm::vec3 myRotationAxis;
     glm::mat4 rotMat (1.0f);
@@ -103,8 +162,13 @@ int main(int argc, char *argv[]) {
     sphereShader.createShader("sphereShaderVert.glsl", "sphereShaderFrag.glsl");
     planeShader.createShader("planeShaderVert.glsl", "planeShaderFrag.glsl");
 
-    sphere.createSphere(0.3, 20);
-    plane.createBox(1.0, 0.1, 1.0);
+    location_tex = glGetUniformLocation( planeShader.programID, "tex" );
+    createPlaneTexture();
+
+    sphere.createSphere(6, 20);
+    plane.createBox(2.0, 0.1, 2.0);
+    terrain.readOBJ("plane2.obj");
+
 
     // send time to shader
     location_time = glGetUniformLocation(sphereShader.programID, "time");
@@ -115,7 +179,7 @@ int main(int argc, char *argv[]) {
     //camera
     Camera camera(glm::perspective(glm::radians(45.0f),
                  (float)width / (float)height, 0.1f, 100.0f),
-                  glm::vec3(2, 1, 2), glm::vec3(0, 0, 0), glm::vec3(0.0f, 1.0f, 0.0f));
+                  glm::vec3(0, 0.5, 4), glm::vec3(0, 0, 0), glm::vec3(0.0f, 1.0f, 0.0f));
 
     glm::mat4 Model = glm::translate(glm::vec3(0, 0.5, 0));
     glm::mat4 sphereMVP = camera.getMVPMatrix(Model);
@@ -137,7 +201,7 @@ int main(int argc, char *argv[]) {
 
 
     glfwSwapInterval(0); // Do not wait for screen refresh between frames
-
+    glEnable(GL_DEPTH_TEST);
     // Main loop
     while(!glfwWindowShouldClose(window))
     {
@@ -149,16 +213,21 @@ int main(int argc, char *argv[]) {
 		// Set the clear color and depth, and clear the buffers for drawing
         glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_CULL_FACE);
+        //glEnable(GL_CULL_FACE);
         /* ---- Rendering code should go here ---- */
 		Utilities :: displayFPS ( window );
         time = (float)glfwGetTime(); // Number of seconds since the program was started
         
         // draw plane
         glUseProgram(planeShader.programID);
-        plane.render();
         glUniformMatrix4fv(planeID, 1, GL_FALSE, &planeMVP[0][0]);
 
+        generateNoise();
+        //plane.render();
+
+        terrain.render();
+        
+        glUseProgram(0);
         // draw sphere
         glUseProgram(sphereShader.programID);
         sphere.render();
@@ -173,6 +242,7 @@ int main(int argc, char *argv[]) {
         glUniformMatrix4fv(location_rotMat, 1, GL_FALSE, &rotMat[0][0]);
         glUniformMatrix4fv(sphereID, 1, GL_FALSE, &sphereMVP[0][0]);
 
+        glUseProgram(0);
         // Swap buffers, i.e. display the image and prepare for next frame.
         glfwSwapBuffers(window);
 

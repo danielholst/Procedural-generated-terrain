@@ -441,7 +441,7 @@ void TriangleSoup::readOBJ(const char* filename) {
 		tag[0] = '\0';
 		sscanf(line, "%2s ", tag);
 		if(!strcmp(tag, "v")) {
-//			printf("Reading vertex %d\n", i_v+1);
+			//printf("Reading vertex %d\n", i_v+1);
 			numargs = sscanf(line, "v %f %f %f",
 				&verts[3*i_v], &verts[3*i_v+1], &verts[3*i_v+2]);
 			if(numargs != 3) {
@@ -480,6 +480,7 @@ void TriangleSoup::readOBJ(const char* filename) {
 		}
 		else if(!strcmp(tag, "f")) {
 //			printf("Reading face %d\n", i_f+1);
+			
 			numargs = sscanf(line, "f %d/%d/%d %d/%d/%d %d/%d/%d",
 				&v1, &t1, &n1, &v2, &t2, &n2, &v3, &t3, &n3);
 			if(numargs != 9) {
@@ -520,7 +521,9 @@ void TriangleSoup::readOBJ(const char* filename) {
 			indexarray[3*i_f+1] = 3*i_f+1;
 			indexarray[3*i_f+2] = 3*i_f+2;
 			i_f++;
+		
 		};
+
 	}
 
 	// Clean up the temporary arrays we created
