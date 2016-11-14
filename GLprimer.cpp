@@ -164,11 +164,11 @@ int main(int argc, char *argv[]) {
 
     location_tex = glGetUniformLocation( planeShader.programID, "tex" );
     createPlaneTexture();
+    generateNoise();
 
     sphere.createSphere(6, 20);
     plane.createBox(2.0, 0.1, 2.0);
     terrain.readOBJ("plane2.obj");
-
 
     // send time to shader
     location_time = glGetUniformLocation(sphereShader.programID, "time");
@@ -179,7 +179,7 @@ int main(int argc, char *argv[]) {
     //camera
     Camera camera(glm::perspective(glm::radians(45.0f),
                  (float)width / (float)height, 0.1f, 100.0f),
-                  glm::vec3(0, 0.5, 4), glm::vec3(0, 0, 0), glm::vec3(0.0f, 1.0f, 0.0f));
+                  glm::vec3(0.0, 0.5, 4.0), glm::vec3(0, 0, 0), glm::vec3(0.0f, 1.0f, 0.0f));
 
     glm::mat4 Model = glm::translate(glm::vec3(0, 0.5, 0));
     glm::mat4 sphereMVP = camera.getMVPMatrix(Model);
@@ -222,7 +222,7 @@ int main(int argc, char *argv[]) {
         glUseProgram(planeShader.programID);
         glUniformMatrix4fv(planeID, 1, GL_FALSE, &planeMVP[0][0]);
 
-        generateNoise();
+        //generateNoise();
         //plane.render();
 
         terrain.render();
@@ -237,8 +237,8 @@ int main(int argc, char *argv[]) {
         
         glUniform1f(location_time , time); // Copy the value to the shader program
 
-        myRotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
-        rotMat = glm::rotate(rotMat,0.01f, myRotationAxis);
+        myRotationAxis = glm::vec3(1.0f, 0.0f, 0.0f);
+        rotMat = glm::rotate(rotMat,0.001f, myRotationAxis);
         glUniformMatrix4fv(location_rotMat, 1, GL_FALSE, &rotMat[0][0]);
         glUniformMatrix4fv(sphereID, 1, GL_FALSE, &sphereMVP[0][0]);
 
