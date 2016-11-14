@@ -48,7 +48,7 @@ int height = 600;
 // The software-generated texture
 GLuint location_tex;
 GLuint textureID;    
-unsigned char *pixels;
+
 
 void createPlaneTexture()
 {
@@ -65,10 +65,11 @@ void createPlaneTexture()
 
 void generateNoise()
 {
+    float pixels[width*height*4];
     int i, j, k;
     int red, grn, blu;
     double x, y;
-    pixels = (unsigned char*) calloc(width*height*4, sizeof(char));
+    //pixels = (unsigned int*) calloc(width*height*4, sizeof(int));
 
     if ( location_tex != -1 ) {
         glUniform1i ( location_tex , 0);
@@ -86,20 +87,21 @@ void generateNoise()
             red = 128 + 127*noise3(8.0*x, 8.0*y, (float)glfwGetTime());
 
             // Set red=grn=blu for grayscale image
-            grn = red;
+            grn = 128 + 127*noise3(8.0*x, 8.0*y, (float)glfwGetTime());
             blu = red;
 
             k = (i + j*width)*4;
-            pixels[k] = red/3;
-            pixels[k + 1] = grn/3;
-            pixels[k + 2] = blu/3;
+            pixels[k] = 10;
+            pixels[k + 1] = grn;
+            pixels[k + 2] = 20;
             pixels[k + 3] = 255;
+            //std::cout << "noise: " << pixels[k+1] << std::endl;
         }
     }
 
     // Upload the texture data to the GPU
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width,
-                     height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+                     height, 0, GL_RGBA, GL_FLOAT, pixels);
 }
 
 
@@ -170,12 +172,13 @@ int main(int argc, char *argv[]) {
     plane.createBox(2.0, 0.1, 2.0);
     terrain.readOBJ("plane2.obj");
 
+/*
     // send time to shader
     location_time = glGetUniformLocation(sphereShader.programID, "time");
     if( location_time == -1) { // If the variable is not found , -1 is returned
         cout << " Unable to locate variable ✬time ✬ in shader !" << endl ;
     }
-
+*/ 
     //camera
     Camera camera(glm::perspective(glm::radians(45.0f),
                  (float)width / (float)height, 0.1f, 100.0f),
