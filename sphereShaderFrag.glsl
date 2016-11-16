@@ -1,6 +1,7 @@
 #version 330 core
 
 //uniform float time;
+uniform vec3 lightPos;
 
 in vec3 interpolatedNormal;
 in vec2 st;

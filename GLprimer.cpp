@@ -120,6 +120,7 @@ int main(int argc, char *argv[]) {
     GLuint planeID;
     GLint location_time;
     GLint location_rotMat;
+    GLint light_pos;
     
     //objects
     TriangleSoup sphere;
@@ -129,6 +130,7 @@ int main(int argc, char *argv[]) {
     // time
     float time;  
     
+    // rotation
     glm::vec3 myRotationAxis;
     glm::mat4 rotMat (1.0f);
 
@@ -165,13 +167,15 @@ int main(int argc, char *argv[]) {
     planeShader.createShader("planeShaderVert.glsl", "planeShaderFrag.glsl");
 
     location_tex = glGetUniformLocation( planeShader.programID, "tex" );
-    createPlaneTexture();
-    generateNoise();
+    //createPlaneTexture();
+    //generateNoise();
 
     sphere.createSphere(6, 20);
     plane.createBox(2.0, 0.1, 2.0);
     terrain.readOBJ("plane2.obj");
 
+    // define light position
+    float lightPos[3] = {0.0, 0.0, 10.0};
 /*
     // send time to shader
     location_time = glGetUniformLocation(sphereShader.programID, "time");
@@ -195,7 +199,9 @@ int main(int argc, char *argv[]) {
     sphereID = glGetUniformLocation(sphereShader.programID, "MVP");
     planeID = glGetUniformLocation(planeShader.programID, "MVP");
     location_rotMat = glGetUniformLocation(sphereShader.programID, "rotMat");
-
+    
+    light_pos = glGetUniformLocation(sphereShader.programID, "lightPos");
+    light_pos = glGetUniformLocation(planeShader.programID, "lightPos");
     // Show some useful information on the GL context
     cout << "GL vendor:       " << glGetString(GL_VENDOR) << endl;
     cout << "GL renderer:     " << glGetString(GL_RENDERER) << endl;
@@ -220,32 +226,45 @@ int main(int argc, char *argv[]) {
         /* ---- Rendering code should go here ---- */
 		Utilities :: displayFPS ( window );
         time = (float)glfwGetTime(); // Number of seconds since the program was started
-        
+
+        //rotation for skydome
+        myRotationAxis = glm::vec3(1.0f, 0.0f, 0.0f);
+        rotMat = glm::rotate(rotMat,0.001f, myRotationAxis);
+
+        // glm::mat4 rot = glm::toMat4(glm::vec3(0,0,0));
+        // glm::mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(lightPos));
+        // glm::mat4 final = rot * trans;
+
+
+        //lightPos = glm::rotate(lightPos, 0.001f, myRotationAxis);
+
         // draw plane
         glUseProgram(planeShader.programID);
         glUniformMatrix4fv(planeID, 1, GL_FALSE, &planeMVP[0][0]);
+        glUniform3fv(light_pos, 1, lightPos); //lightPos.x, lightPos.y, lightPos.z);
+        glUniformMatrix4fv(location_rotMat, 1, GL_FALSE, &rotMat[0][0]);
 
         //generateNoise();
         //plane.render();
 
         terrain.render();
-        
         glUseProgram(0);
+
+
         // draw sphere
         glUseProgram(sphereShader.programID);
-        sphere.render();
 
         // wireframe mode
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         
         glUniform1f(location_time , time); // Copy the value to the shader program
-
-        myRotationAxis = glm::vec3(1.0f, 0.0f, 0.0f);
-        rotMat = glm::rotate(rotMat,0.001f, myRotationAxis);
+        glUniform3fv(light_pos, 1, lightPos);
         glUniformMatrix4fv(location_rotMat, 1, GL_FALSE, &rotMat[0][0]);
         glUniformMatrix4fv(sphereID, 1, GL_FALSE, &sphereMVP[0][0]);
-
+        
+        sphere.render();
         glUseProgram(0);
+        
         // Swap buffers, i.e. display the image and prepare for next frame.
         glfwSwapBuffers(window);
 

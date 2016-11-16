@@ -7,12 +7,13 @@ layout ( location =2) in vec2 TexCoord;
 //uniform float time;
 uniform mat4 MVP;
 uniform mat4 rotMat;
+uniform vec3 lightPos;
 
 out vec3 interpolatedNormal;
 out vec2 st;
 
 vec3 viewPos = vec3(0.0, 0.0, 1.0);
-vec3 lightPos = vec3(4.0, 2.0, 2.0);
+//vec3 lightPos = vec3(4.0, 2.0, 2.0);
 
 void main () {
 		
