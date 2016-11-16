@@ -16,6 +16,16 @@ public:
 	glm::vec3 getDir() const;
 	glm::vec3 getUp() const;
 
+	void rotateRight();
+	void rotateLeft();
+
+	void movePosUp();
+	void movePosDown();
+	void movePosLeft();
+	void movePosRight();
+	void movePosBack();
+	void movePosForth();
+
 	glm::mat4 getViewMatrix() const;
 	glm::mat4 getMVPMatrix(glm::mat4 model) const;
 
@@ -25,4 +35,5 @@ private:
 	glm::vec3 position;
 	glm::vec3 direction;
 	glm::vec3 upDirection;
+	glm::vec3 startDirection;
 };

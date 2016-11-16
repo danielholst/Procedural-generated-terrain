@@ -49,6 +49,22 @@ int height = 600;
 GLuint location_tex;
 GLuint textureID;    
 
+/*
+glm::mat4 PVcalc(GLuint location_cameraPosition, GLuint location_viewMatrix) {
+    computeMatricesFromInputs();
+    glm::mat4 ProjectionMatrix = getProjectionMatrix();
+    glm::vec3 cameraPosition = getCameraPosition();
+    glm::mat4 ViewMatrix = getViewMatrix();
+    glm::mat4 PV = ProjectionMatrix*ViewMatrix;
+
+    //copy camera position to vetex shader
+
+    glUniformMatrix4fv(location_cameraPosition, 1, GL_FALSE, &ViewMatrix[0][0]);
+
+    //std::cout << glm::to_string(ViewMatrix) << std::endl;
+    return PV;
+}
+*/
 
 void createPlaneTexture()
 {
@@ -163,6 +179,13 @@ int main(int argc, char *argv[]) {
     // (This step is strictly required, or things will simply not work)
     glfwMakeContextCurrent(window);
 
+    // Hide the mouse and enable unlimited mouvement
+    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // // Set the mouse at the center of the screen
+    // glfwPollEvents();
+    // glfwSetCursorPos(window, width / 2, height / 2);
+
+
     sphereShader.createShader("sphereShaderVert.glsl", "sphereShaderFrag.glsl");
     planeShader.createShader("planeShaderVert.glsl", "planeShaderFrag.glsl");
 
@@ -186,15 +209,15 @@ int main(int argc, char *argv[]) {
     //camera
     Camera camera(glm::perspective(glm::radians(45.0f),
                  (float)width / (float)height, 0.1f, 100.0f),
-                  glm::vec3(0.0, 0.5, 4.0), glm::vec3(0, 0, 0), glm::vec3(0.0f, 1.0f, 0.0f));
+                  glm::vec3(0.0, 0.3, 1.0), glm::vec3(0, 0, -1), glm::vec3(0.0f, 1.0f, 0.0f));
 
     glm::mat4 Model = glm::translate(glm::vec3(0, 0.5, 0));
-    glm::mat4 sphereMVP = camera.getMVPMatrix(Model);
+    glm::mat4 sphereMVP;
     
 
     // fix plane trans TODO
     glm::mat4 planeTrans = glm::translate(glm::vec3(0, 0, 0));
-    glm::mat4 planeMVP = camera.getMVPMatrix(planeTrans);
+    glm::mat4 planeMVP;
 
     sphereID = glGetUniformLocation(sphereShader.programID, "MVP");
     planeID = glGetUniformLocation(planeShader.programID, "MVP");
@@ -234,12 +257,40 @@ int main(int argc, char *argv[]) {
         // glm::mat4 rot = glm::toMat4(glm::vec3(0,0,0));
         // glm::mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(lightPos));
         // glm::mat4 final = rot * trans;
+        
+        //rotate camera with left and right keys
+        if (glfwGetKey( window, GLFW_KEY_RIGHT ) == GLFW_PRESS){
+            camera.rotateRight();
+        }
+        if (glfwGetKey( window, GLFW_KEY_LEFT ) == GLFW_PRESS){
+            camera.rotateLeft();
+        }
 
+        // move camera
+        if (glfwGetKey( window, GLFW_KEY_W ) == GLFW_PRESS){
+            camera.movePosForth();
+        }
+        if (glfwGetKey( window, GLFW_KEY_S ) == GLFW_PRESS){
+            camera.movePosBack();
+        }
+        if (glfwGetKey( window, GLFW_KEY_A ) == GLFW_PRESS){
+            camera.movePosLeft();
+        }
+        if (glfwGetKey( window, GLFW_KEY_D ) == GLFW_PRESS){
+            camera.movePosRight();
+        }
+        if (glfwGetKey( window, GLFW_KEY_Q ) == GLFW_PRESS){
+            camera.movePosDown();
+        }
+        if (glfwGetKey( window, GLFW_KEY_E ) == GLFW_PRESS){
+            camera.movePosUp();
+        }
 
         //lightPos = glm::rotate(lightPos, 0.001f, myRotationAxis);
 
         // draw plane
         glUseProgram(planeShader.programID);
+        planeMVP = camera.getMVPMatrix(planeTrans);
         glUniformMatrix4fv(planeID, 1, GL_FALSE, &planeMVP[0][0]);
         glUniform3fv(light_pos, 1, lightPos); //lightPos.x, lightPos.y, lightPos.z);
         glUniformMatrix4fv(location_rotMat, 1, GL_FALSE, &rotMat[0][0]);
@@ -253,7 +304,7 @@ int main(int argc, char *argv[]) {
 
         // draw sphere
         glUseProgram(sphereShader.programID);
-
+        sphereMVP = camera.getMVPMatrix(Model);
         // wireframe mode
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         
