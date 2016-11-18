@@ -28,6 +28,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 #include "camera.hpp"
 #include "noise1234.hpp"
 
@@ -137,6 +138,7 @@ int main(int argc, char *argv[]) {
     GLint location_time;
     GLint location_rotMat;
     GLint light_pos;
+    GLint eye_pos;
     
     //objects
     TriangleSoup sphere;
@@ -198,7 +200,7 @@ int main(int argc, char *argv[]) {
     terrain.readOBJ("plane2.obj");
 
     // define light position
-    float lightPos[3] = {0.0, 0.0, 10.0};
+    float lightPos[3] = {0.0, 0.0, 9.9};
 /*
     // send time to shader
     location_time = glGetUniformLocation(sphereShader.programID, "time");
@@ -225,6 +227,10 @@ int main(int argc, char *argv[]) {
     
     light_pos = glGetUniformLocation(sphereShader.programID, "lightPos");
     light_pos = glGetUniformLocation(planeShader.programID, "lightPos");
+
+    eye_pos = glGetUniformLocation(planeShader.programID, "eyePosition");
+    eye_pos = glGetUniformLocation(sphereShader.programID, "eyePosition");
+
     // Show some useful information on the GL context
     cout << "GL vendor:       " << glGetString(GL_VENDOR) << endl;
     cout << "GL renderer:     " << glGetString(GL_RENDERER) << endl;
@@ -286,13 +292,12 @@ int main(int argc, char *argv[]) {
             camera.movePosUp();
         }
 
-        //lightPos = glm::rotate(lightPos, 0.001f, myRotationAxis);
-
         // draw plane
         glUseProgram(planeShader.programID);
         planeMVP = camera.getMVPMatrix(planeTrans);
         glUniformMatrix4fv(planeID, 1, GL_FALSE, &planeMVP[0][0]);
-        glUniform3fv(light_pos, 1, lightPos); //lightPos.x, lightPos.y, lightPos.z);
+        glUniform3fv(light_pos, 1, lightPos);
+        glUniform3fv(eye_pos, 1, glm::value_ptr(camera.getPos()));
         glUniformMatrix4fv(location_rotMat, 1, GL_FALSE, &rotMat[0][0]);
 
         //generateNoise();
@@ -310,6 +315,7 @@ int main(int argc, char *argv[]) {
         
         glUniform1f(location_time , time); // Copy the value to the shader program
         glUniform3fv(light_pos, 1, lightPos);
+        glUniform3fv(eye_pos, 1, glm::value_ptr(camera.getPos()));
         glUniformMatrix4fv(location_rotMat, 1, GL_FALSE, &rotMat[0][0]);
         glUniformMatrix4fv(sphereID, 1, GL_FALSE, &sphereMVP[0][0]);
         

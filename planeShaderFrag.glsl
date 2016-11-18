@@ -9,11 +9,12 @@ in vec2 st;
 uniform sampler2D tex;
 uniform mat4 rotMat;
 uniform vec3 lightPos;
+uniform vec3 eyePosition;
 
 //vec3 lightPos = vec3(0.0, 4.0, 2.0);
 vec3 LightColor = vec3(0.6,0.7,0.6);
-float LightPower = 30.0;
-vec3 eyePosition = vec3(0.0, 0.5, 4.0);
+float LightPower = 10.0;
+
 
 //out vec4 finalcolor;
 out vec3 color;
@@ -24,15 +25,15 @@ void main () {
 	light = light*rotMat;
 
 	// Material properties
-	vec3 MaterialDiffuseColor = vec3(0.2,0.6,0.2)*texture(tex, st).rgb;
+	vec3 MaterialDiffuseColor = vec3(0.2,0.6,0.2);
 	vec3 MaterialAmbientColor = vec3(0.2,0.2,0.2) * MaterialDiffuseColor;
-	vec3 MaterialSpecularColor = vec3(0.3,0.3,0.3);
+	vec3 MaterialSpecularColor = vec3(0.9,0.9,0.9);
 	
 	// Distance to the light
 	float distance = length(vec3(light) - pos);
 
 	// Normal of the computed fragment, in camera space
-	vec3 n = normalize(-interpolatedNormal);
+	vec3 n = normalize(interpolatedNormal);
 	// Direction of the light (from the fragment to the light)
 	vec3 l = normalize(pos-vec3(light));
 	// Cosine of the angle between the normal and the light direction, 
