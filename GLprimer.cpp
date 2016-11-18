@@ -46,82 +46,6 @@ using namespace std;
 int width = 800;
 int height = 600;
 
-// The software-generated texture
-GLuint location_tex;
-GLuint textureID;    
-
-/*
-glm::mat4 PVcalc(GLuint location_cameraPosition, GLuint location_viewMatrix) {
-    computeMatricesFromInputs();
-    glm::mat4 ProjectionMatrix = getProjectionMatrix();
-    glm::vec3 cameraPosition = getCameraPosition();
-    glm::mat4 ViewMatrix = getViewMatrix();
-    glm::mat4 PV = ProjectionMatrix*ViewMatrix;
-
-    //copy camera position to vetex shader
-
-    glUniformMatrix4fv(location_cameraPosition, 1, GL_FALSE, &ViewMatrix[0][0]);
-
-    //std::cout << glm::to_string(ViewMatrix) << std::endl;
-    return PV;
-}
-*/
-
-void createPlaneTexture()
-{
-    glGenTextures (1, &textureID );
-    glBindTexture ( GL_TEXTURE_2D , textureID );
-    // Set parameters to determine how the texture is resized
-    glTexParameteri ( GL_TEXTURE_2D , GL_TEXTURE_MIN_FILTER , GL_LINEAR );
-    glTexParameteri ( GL_TEXTURE_2D , GL_TEXTURE_MAG_FILTER , GL_LINEAR );
-    // Set parameters to determine how the texture wraps at edges
-    glTexParameteri ( GL_TEXTURE_2D , GL_TEXTURE_WRAP_S , GL_REPEAT );
-    glTexParameteri ( GL_TEXTURE_2D , GL_TEXTURE_WRAP_T , GL_REPEAT );
-
-}
-
-void generateNoise()
-{
-    float pixels[width*height*4];
-    int i, j, k;
-    int red, grn, blu;
-    double x, y;
-    //pixels = (unsigned int*) calloc(width*height*4, sizeof(int));
-
-    if ( location_tex != -1 ) {
-        glUniform1i ( location_tex , 0);
-    }
-
-    // Regenerate all the texture data on the CPU for every frame
-    for(i=0; i<width; i++)
-    {
-        x = (double)i / width;
-        for(j=0; j<height; j++)
-        {
-            y = (double)j / height;
-
-            // Perlin noise
-            red = 128 + 127*noise3(8.0*x, 8.0*y, (float)glfwGetTime());
-
-            // Set red=grn=blu for grayscale image
-            grn = 128 + 127*noise3(8.0*x, 8.0*y, (float)glfwGetTime());
-            blu = red;
-
-            k = (i + j*width)*4;
-            pixels[k] = 10;
-            pixels[k + 1] = grn;
-            pixels[k + 2] = 20;
-            pixels[k + 3] = 255;
-            //std::cout << "noise: " << pixels[k+1] << std::endl;
-        }
-    }
-
-    // Upload the texture data to the GPU
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width,
-                     height, 0, GL_RGBA, GL_FLOAT, pixels);
-}
-
-
 /*
  * main(argc, argv) - the standard C++ entry point for the program
  */
@@ -178,25 +102,12 @@ int main(int argc, char *argv[]) {
     }
 
     // Make the newly created window the "current context" for OpenGL
-    // (This step is strictly required, or things will simply not work)
     glfwMakeContextCurrent(window);
-
-    // Hide the mouse and enable unlimited mouvement
-    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    // // Set the mouse at the center of the screen
-    // glfwPollEvents();
-    // glfwSetCursorPos(window, width / 2, height / 2);
-
 
     sphereShader.createShader("sphereShaderVert.glsl", "sphereShaderFrag.glsl");
     planeShader.createShader("planeShaderVert.glsl", "planeShaderFrag.glsl");
 
-    location_tex = glGetUniformLocation( planeShader.programID, "tex" );
-    //createPlaneTexture();
-    //generateNoise();
-
-    sphere.createSphere(6, 20);
-    plane.createBox(2.0, 0.1, 2.0);
+    sphere.createSphere(10, 20);
     terrain.readOBJ("plane2.obj");
 
     // define light position
@@ -238,7 +149,7 @@ int main(int argc, char *argv[]) {
     cout << "Desktop size:    " << width << "x" << height << " pixels" << endl;
 
 
-    glfwSwapInterval(0); // Do not wait for screen refresh between frames
+    glfwSwapInterval(0); 
     glEnable(GL_DEPTH_TEST);
     // Main loop
     while(!glfwWindowShouldClose(window))
@@ -252,6 +163,7 @@ int main(int argc, char *argv[]) {
         glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         //glEnable(GL_CULL_FACE);
+
         /* ---- Rendering code should go here ---- */
 		Utilities :: displayFPS ( window );
         time = (float)glfwGetTime(); // Number of seconds since the program was started
@@ -259,10 +171,6 @@ int main(int argc, char *argv[]) {
         //rotation for skydome
         myRotationAxis = glm::vec3(1.0f, 0.0f, 0.0f);
         rotMat = glm::rotate(rotMat,0.001f, myRotationAxis);
-
-        // glm::mat4 rot = glm::toMat4(glm::vec3(0,0,0));
-        // glm::mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(lightPos));
-        // glm::mat4 final = rot * trans;
         
         //rotate camera with left and right keys
         if (glfwGetKey( window, GLFW_KEY_RIGHT ) == GLFW_PRESS){
@@ -300,18 +208,12 @@ int main(int argc, char *argv[]) {
         glUniform3fv(eye_pos, 1, glm::value_ptr(camera.getPos()));
         glUniformMatrix4fv(location_rotMat, 1, GL_FALSE, &rotMat[0][0]);
 
-        //generateNoise();
-        //plane.render();
-
         terrain.render();
         glUseProgram(0);
-
 
         // draw sphere
         glUseProgram(sphereShader.programID);
         sphereMVP = camera.getMVPMatrix(Model);
-        // wireframe mode
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         
         glUniform1f(location_time , time); // Copy the value to the shader program
         glUniform3fv(light_pos, 1, lightPos);
