@@ -6,28 +6,63 @@ layout ( location =2) in vec2 TexCoord;
 
 uniform mat4 MVP;
 uniform vec3 lightPos;
+uniform vec3 eyePosition;
 
 out vec3 interpolatedNormal;
 out vec2 st;
 out vec3 pos;
 
-//vec3 lightPos = vec3(4.0, 4.0, 2.0);
-vec3 eyePosition = vec3(0.0, 0.5, 4.0);
+float delta = 0.3;
+
+vec3 getNewPos(vec2 pos)
+{
+	// distance to center
+	float rand = fract(sin(dot(pos ,vec2(12.9898,78.233))) * 43758.5453);
+	float dist = length(pos);
+	vec3 newPos = vec3(pos.x, rand*dist/100, pos.y);
+	return newPos;
+}
 
 void main () {
+/*
+	// Displace surface
+	vec3 grad = vec3(0.0); // To store gradient of noise
+	float bump = snoise(coord*2.0 + vec3(0.2, 0.13, 0.33)*time, grad);
+	grad *= 2.0; // Scale gradient with inner derivative
+    f.texCoord3 = coord; // Undisplaced, untransformed position
+	coord += displaceamount * bump * f.normal;
+	*/
+    //f.texCoord3 = coord; // Displaced but untransformed position
 
     //vec3 eyeDirection = normalize(eyePosition - Position);
   	//vec3 lightDirection = normalize(lightPos - Position);
-	vec3 normal = normalize(Normal);
+
+
+  	// to recalculate normals, check neighbors in x and z and get dx, dy.
+  	// then N^ =  normalize(N0 - g -(g dot N0)N0)
+	vec2 posXp = vec2(Position.x + delta, Position.z);
+	vec2 posXm = vec2(Position.x - delta, Position.z);
+	vec2 posZp = vec2(Position.x, Position.z + delta);
+	vec2 posZm = vec2(Position.x, Position.z - delta);
+
+	vec3 dx = (getNewPos(posXp) - getNewPos(posXm))/(2*delta);
+	vec3 dz = (getNewPos(posZp) - getNewPos(posZm))/(2*delta);
+
+/*
+  	// Perturb normal
+	vec3 perturbation = grad - dot(grad, f.normal) * f.normal;
+	f.normal -= bumpamount * 0.2 * perturbation;
+	f.normal = normalize(f.normal);
+*/
+	vec3 normal = normalize(cross(dx, dz));
 
 	// distance to center
 	float rand = fract(sin(dot(vec2(Position.x,Position.z) ,vec2(12.9898,78.233))) * 43758.5453);
 	float dist = abs(pow(Position.x, 2) + pow(Position.z, 2));
 	vec4 offset = vec4(0.0, rand*dist/100, 0.0, 1.0);
 		
-	interpolatedNormal = Normal;
+	interpolatedNormal = normal;
 	st = TexCoord;
-	
 	pos = Position+vec3(offset);
 	
 	gl_Position =  MVP * (vec4 (Position, 1.0) + offset);

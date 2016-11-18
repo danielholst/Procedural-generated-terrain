@@ -4,22 +4,23 @@
 uniform vec3 lightPos;
 uniform vec3 eyePosition;
 uniform mat4 rotMat;
+uniform mat4 MVP;
 
 in vec3 interpolatedNormal;
 in vec2 st;
 in vec3 pos;
 
 vec3 LightColor = vec3(0.6,0.7,0.6);
-float LightPower = 1.0;
+float LightPower = 5.0;
 
 out vec3 color;
 
 void main () {
 
-	vec4 mat = vec4(0.1, 0.1, 0.8, 1.0);// + vec4 (vec3(interpolatedNormal)*vec3(0,0,1), 1.0) ;
+	vec4 mat = vec4(0.1, 0.1, 0.8, 1.0) + vec4 (vec3(interpolatedNormal)*vec3(0,0,1), 1.0) ;
 
 	vec4 light = vec4(lightPos, 1);
-	light = light*rotMat;
+	light =  rotMat * light;
 
 	// Material properties
 	vec3 MaterialDiffuseColor = vec3(mat);
@@ -30,7 +31,7 @@ void main () {
 	float distance = length(vec3(light) - pos);
 
 	// Normal of the computed fragment, in camera space
-	vec3 n = normalize(-interpolatedNormal);
+	vec3 n = normalize(interpolatedNormal);
 	// Direction of the light (from the fragment to the light)
 	vec3 l = normalize(pos-vec3(light));
 	// Cosine of the angle between the normal and the light direction, 
@@ -45,6 +46,5 @@ void main () {
 
 	color = MaterialAmbientColor
 	+ MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance)
-	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)
-	+ vec3(1.0, 1.0, 1.0)*pos.y/2;
+	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance);
 }

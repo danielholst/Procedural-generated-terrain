@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
     terrain.readOBJ("plane2.obj");
 
     // define light position
-    float lightPos[3] = {0.0, 0.0, 9.9};
+    float lightPos[3] = {0.0, 0.0, -9.9};
 /*
     // send time to shader
     location_time = glGetUniformLocation(sphereShader.programID, "time");

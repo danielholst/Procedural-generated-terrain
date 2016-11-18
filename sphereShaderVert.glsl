@@ -21,5 +21,5 @@ void main () {
 		interpolatedNormal = Normal;
 		st = TexCoord;
 		pos = Position;
-		gl_Position = MVP * rotMat * vec4 ( vec3(Position.x, Position.y, Position.z) , 1.0);
+		gl_Position = MVP * rotMat * vec4 (Position , 1.0);
 }

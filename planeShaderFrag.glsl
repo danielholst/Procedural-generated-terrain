@@ -13,7 +13,7 @@ uniform vec3 eyePosition;
 
 //vec3 lightPos = vec3(0.0, 4.0, 2.0);
 vec3 LightColor = vec3(0.6,0.7,0.6);
-float LightPower = 10.0;
+float LightPower = 5.0;
 
 
 //out vec4 finalcolor;
@@ -23,9 +23,11 @@ void main () {
 
 	vec4 light = vec4(lightPos, 1);
 	light = light*rotMat;
+	vec3 colorGreen = vec3(0.2,0.6,0.2);
+	vec3 colorBrown = vec3(0.93, 0.81,0.63); //238;207;161
 
 	// Material properties
-	vec3 MaterialDiffuseColor = vec3(0.2,0.6,0.2);
+	vec3 MaterialDiffuseColor = mix(colorGreen, colorBrown, 0.3);
 	vec3 MaterialAmbientColor = vec3(0.2,0.2,0.2) * MaterialDiffuseColor;
 	vec3 MaterialSpecularColor = vec3(0.9,0.9,0.9);
 	
@@ -33,7 +35,7 @@ void main () {
 	float distance = length(vec3(light) - pos);
 
 	// Normal of the computed fragment, in camera space
-	vec3 n = normalize(interpolatedNormal);
+	vec3 n = normalize(-interpolatedNormal);
 	// Direction of the light (from the fragment to the light)
 	vec3 l = normalize(pos-vec3(light));
 	// Cosine of the angle between the normal and the light direction, 
