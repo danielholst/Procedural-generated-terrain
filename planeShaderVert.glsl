@@ -18,7 +18,7 @@ vec3 getNewPos(vec2 pos)
 {
 	// distance to center
 	float rand = fract(sin(dot(pos ,vec2(12.9898,78.233))) * 43758.5453);
-	float dist = length(pos);
+	float dist = abs(pow(pos.x, 2) + pow(pos.y, 2));
 	vec3 newPos = vec3(pos.x, rand*dist/100, pos.y);
 	return newPos;
 }
@@ -48,17 +48,12 @@ void main () {
 	vec3 dx = (getNewPos(posXp) - getNewPos(posXm))/(2*delta);
 	vec3 dz = (getNewPos(posZp) - getNewPos(posZm))/(2*delta);
 
-/*
-  	// Perturb normal
-	vec3 perturbation = grad - dot(grad, f.normal) * f.normal;
-	f.normal -= bumpamount * 0.2 * perturbation;
-	f.normal = normalize(f.normal);
-*/
 	vec3 normal = normalize(cross(dx, dz));
 
 	// distance to center
 	float rand = fract(sin(dot(vec2(Position.x,Position.z) ,vec2(12.9898,78.233))) * 43758.5453);
 	float dist = abs(pow(Position.x, 2) + pow(Position.z, 2));
+	//float distWater = 
 	vec4 offset = vec4(0.0, rand*dist/100, 0.0, 1.0);
 		
 	interpolatedNormal = normal;
