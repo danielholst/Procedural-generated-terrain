@@ -19,11 +19,14 @@ vec3 getNewPos(vec2 pos)
 	// distance to center
 	float rand = fract(sin(dot(pos ,vec2(12.9898,78.233))) * 43758.5453);
 	float dist = abs(pow(pos.x, 2) + pow(pos.y, 2));
+
 	vec3 newPos = vec3(pos.x, rand*dist/100, pos.y);
 	return newPos;
 }
 
 void main () {
+
+	vec4 offset;
 /*
 	// Displace surface
 	vec3 grad = vec3(0.0); // To store gradient of noise
@@ -53,8 +56,18 @@ void main () {
 	// distance to center
 	float rand = fract(sin(dot(vec2(Position.x,Position.z) ,vec2(12.9898,78.233))) * 43758.5453);
 	float dist = abs(pow(Position.x, 2) + pow(Position.z, 2));
-	//float distWater = 
-	vec4 offset = vec4(0.0, rand*dist/100, 0.0, 1.0);
+	
+	float distWater = abs(Position.x - 2.0);
+	float water;
+	if (distWater < 1.7 + rand && abs(Position.z) < 3.0 + rand/10)
+	{
+		water = -abs(-2.2 + distWater);
+		offset = vec4(0.0, water , 0.0, 1.0);
+	}
+	else
+	{
+		offset = vec4(0.0, rand*dist/100, 0.0, 1.0);
+	}
 		
 	interpolatedNormal = normal;
 	st = TexCoord;

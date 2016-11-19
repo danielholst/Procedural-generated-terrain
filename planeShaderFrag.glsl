@@ -222,26 +222,21 @@ void main () {
 	
 	// Perturb normal
 	vec3 perturbation = grad - dot(grad, interpolatedNormal) * interpolatedNormal;
-	vec3 norm = interpolatedNormal - 0.1 * 0.2 * perturbation;
-	//interpolatedNormal = normalize(interpolatedNormal);
-
-
-
-
+	vec3 norm = interpolatedNormal -  0.2 * perturbation;
 
 
 	// Material properties
-	vec3 MaterialDiffuseColor = mix(colorGreen, colorBrown, 0.3);
+	vec3 MaterialDiffuseColor = mix(colorGreen, colorBrown, 0.5);
 	vec3 MaterialAmbientColor = vec3(0.2,0.2,0.2) * MaterialDiffuseColor;
-	vec3 MaterialSpecularColor = vec3(0.9,0.9,0.9);
+	vec3 MaterialSpecularColor = vec3(0.7,0.7,0.7);
 	
 	// Distance to the light
 	float distance = length(vec3(light) - pos);
 
 	// Normal of the computed fragment, in camera space
-	vec3 n = normalize(-norm);
+	vec3 n = normalize(norm);
 	// Direction of the light (from the fragment to the light)
-	vec3 l = normalize(pos-vec3(light));
+	vec3 l = normalize(vec3(light)-pos);
 	// Cosine of the angle between the normal and the light direction, 
 	float cosTheta = clamp( dot( n,l ), 0,1 );
 
@@ -255,7 +250,7 @@ void main () {
 	color = MaterialAmbientColor
 	+ MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance)
 	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)
-	+ vec3(1.0, 1.0, 1.0)*pos.y/2;
+	+ vec3(1.0, 1.0, 1.0)*pos.y/3;
 
 
 	//finalcolor = texture(tex, st) * vec4 (vec3(interpolatedNormal), 1.0);

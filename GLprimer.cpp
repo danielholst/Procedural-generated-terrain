@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
     terrain.readOBJ("plane2.obj");
 
     // define light position
-    float lightPos[3] = {0.0, 0.0, -9.9};
+    float lightPos[3] = {0.0, 0.0, 9.9};
 /*
     // send time to shader
     location_time = glGetUniformLocation(sphereShader.programID, "time");
@@ -169,7 +169,7 @@ int main(int argc, char *argv[]) {
         time = (float)glfwGetTime(); // Number of seconds since the program was started
 
         //rotation for skydome
-        myRotationAxis = glm::vec3(1.0f, 0.0f, 0.0f);
+        myRotationAxis = glm::vec3(-1.0f, 0.0f, 0.0f);
         rotMat = glm::rotate(rotMat,0.001f, myRotationAxis);
         
         //rotate camera with left and right keys
