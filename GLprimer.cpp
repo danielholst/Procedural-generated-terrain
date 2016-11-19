@@ -62,7 +62,9 @@ int main(int argc, char *argv[]) {
     GLuint waterID;
     GLint location_time;
     GLint location_rotMat;
-    GLint light_pos;
+    GLint light_pos1;
+    GLint light_pos2;
+    GLint light_pos3;
     GLint eye_pos;
     
     //objects
@@ -115,13 +117,13 @@ int main(int argc, char *argv[]) {
 
     // define light position
     float lightPos[3] = {0.0, 0.0, 9.9};
-/*
+
     // send time to shader
-    location_time = glGetUniformLocation(sphereShader.programID, "time");
+    location_time = glGetUniformLocation(waterShader.programID, "time");
     if( location_time == -1) { // If the variable is not found , -1 is returned
         cout << " Unable to locate variable ✬time ✬ in shader !" << endl ;
     }
-*/ 
+
     //camera
     Camera camera(glm::perspective(glm::radians(45.0f),
                  (float)width / (float)height, 0.1f, 100.0f),
@@ -142,9 +144,9 @@ int main(int argc, char *argv[]) {
     waterID = glGetUniformLocation(waterShader.programID, "MVP");
     location_rotMat = glGetUniformLocation(sphereShader.programID, "rotMat");
     
-    light_pos = glGetUniformLocation(sphereShader.programID, "lightPos");
-    light_pos = glGetUniformLocation(planeShader.programID, "lightPos");
-    light_pos = glGetUniformLocation(waterShader.programID, "lightPos");
+    light_pos1 = glGetUniformLocation(sphereShader.programID, "lightPos");
+    light_pos2 = glGetUniformLocation(planeShader.programID, "lightPos");
+    light_pos3 = glGetUniformLocation(waterShader.programID, "lightPos");
 
     eye_pos = glGetUniformLocation(planeShader.programID, "eyePosition");
     eye_pos = glGetUniformLocation(sphereShader.programID, "eyePosition");
@@ -213,7 +215,7 @@ int main(int argc, char *argv[]) {
         glUseProgram(planeShader.programID);
         planeMVP = camera.getMVPMatrix(planeTrans);
         glUniformMatrix4fv(planeID, 1, GL_FALSE, &planeMVP[0][0]);
-        glUniform3fv(light_pos, 1, lightPos);
+        glUniform3fv(light_pos2, 1, lightPos);
         glUniform3fv(eye_pos, 1, glm::value_ptr(camera.getPos()));
         glUniformMatrix4fv(location_rotMat, 1, GL_FALSE, &rotMat[0][0]);
 
@@ -225,7 +227,7 @@ int main(int argc, char *argv[]) {
         sphereMVP = camera.getMVPMatrix(Model);
         
         glUniform1f(location_time , time); // Copy the value to the shader program
-        glUniform3fv(light_pos, 1, lightPos);
+        glUniform3fv(light_pos1, 1, lightPos);
         glUniform3fv(eye_pos, 1, glm::value_ptr(camera.getPos()));
         glUniformMatrix4fv(location_rotMat, 1, GL_FALSE, &rotMat[0][0]);
         glUniformMatrix4fv(sphereID, 1, GL_FALSE, &sphereMVP[0][0]);
@@ -237,7 +239,8 @@ int main(int argc, char *argv[]) {
         glUseProgram(waterShader.programID);
         waterMVP = camera.getMVPMatrix(waterTrans);
         glUniformMatrix4fv(waterID, 1, GL_FALSE, &waterMVP[0][0]);
-        glUniform3fv(light_pos, 1, lightPos);
+        glUniform3fv(light_pos3, 1, lightPos);
+        glUniform1f(location_time , time); 
         glUniform3fv(eye_pos, 1, glm::value_ptr(camera.getPos()));
         glUniformMatrix4fv(location_rotMat, 1, GL_FALSE, &rotMat[0][0]);
         water.render();

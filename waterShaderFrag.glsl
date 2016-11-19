@@ -1,6 +1,6 @@
 #version 330 core
 
-//uniform float time;
+uniform float time;
 
 in vec3 pos;
 in vec3 interpolatedNormal;
@@ -17,7 +17,7 @@ float LightPower = 5.0;
 
 
 //out vec4 finalcolor;
-out vec3 color;
+out vec4 color;
 
 
 // Authors : Ian McEwan, Ashima Arts and Stefan Gustavson, LiU.
@@ -213,12 +213,12 @@ void main () {
 	// Bump map surface
 	vec3 grad = vec3(0.0); // To store gradient of noise
 	vec3 gradtemp = vec3(0.0); // Temporary gradient for fractal sum
-	float bump = snoise(pos*10.0, grad);
-	grad *= 10.0; // Scale gradient with inner derivative
-	bump += 0.5 * snoise(pos*20.0, gradtemp);
-	grad += 10.0 * gradtemp; // Same influence (double freq, half amp)
-	bump += 0.25 * snoise(pos*40.0, gradtemp);
-	grad += 10.0 * gradtemp; // Same influence (double freq, half amp)
+	float bump = 5* snoise(2.0 - pos*2* time, grad);
+	grad *= 10; // Scale gradient with inner derivative
+	bump += 0.5 * snoise(pos*10.0, gradtemp);
+	grad += 5.0 * gradtemp; // Same influence (double freq, half amp)
+	//bump += 0.25 * snoise(pos*40.0, gradtemp);
+	//grad += 10.0 * gradtemp; // Same influence (double freq, half amp)
 	
 	// Perturb normal
 	vec3 perturbation = grad - dot(grad, interpolatedNormal) * interpolatedNormal;
@@ -228,7 +228,7 @@ void main () {
 	// Material properties
 	vec3 MaterialDiffuseColor = mix(colorBlue, colorLightBlue, 0.5);
 	vec3 MaterialAmbientColor = vec3(0.2,0.2,0.2) * MaterialDiffuseColor;
-	vec3 MaterialSpecularColor = vec3(0.7,0.7,0.7);
+	vec3 MaterialSpecularColor = vec3(0.9,0.9,0.9);
 	
 	// Distance to the light
 	float distance = length(vec3(light) - pos);
@@ -247,10 +247,9 @@ void main () {
 	// Cosine of the angle between the Eye vector and the Reflect vector,
 	float cosAlpha = clamp( dot( E,R ), 0,1 );
 
-	color = MaterialAmbientColor
+	color = vec4(vec3(MaterialAmbientColor
 	+ MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance)
-	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)
-	+ vec3(1.0, 1.0, 1.0)*pos.y/3;
+	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)), 0.0);
 
 
 	//finalcolor = texture(tex, st) * vec4 (vec3(interpolatedNormal), 1.0);
