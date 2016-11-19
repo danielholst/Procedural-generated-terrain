@@ -57,7 +57,7 @@ void main () {
 		
 	interpolatedNormal = Normal;
 	st = TexCoord;
-	pos = Position+vec3(offset);
+	pos = Position; //+vec3(offset);
 	
 	gl_Position =  MVP * (vec4 (Position, 1.0));
 }

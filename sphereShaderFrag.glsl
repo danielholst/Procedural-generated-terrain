@@ -11,7 +11,7 @@ in vec2 st;
 in vec3 pos;
 
 vec3 LightColor = vec3(0.6,0.7,0.6);
-float LightPower = 5.0;
+float LightPower = 10.0;
 
 out vec3 color;
 
@@ -24,8 +24,8 @@ void main () {
 
 	// Material properties
 	vec3 MaterialDiffuseColor = vec3(mat);
-	vec3 MaterialAmbientColor = vec3(mat) * MaterialDiffuseColor;
-	vec3 MaterialSpecularColor = vec3(mat);
+	vec3 MaterialAmbientColor = vec3(0.2, 0.2, 0.2) * MaterialDiffuseColor;
+	vec3 MaterialSpecularColor = vec3(0.8, 0.8, 0.8) * MaterialDiffuseColor;
 	
 	// Distance to the light
 	float distance = length(vec3(light) - pos);

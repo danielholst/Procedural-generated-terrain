@@ -61,7 +61,9 @@ int main(int argc, char *argv[]) {
     GLuint planeID;
     GLuint waterID;
     GLint location_time;
-    GLint location_rotMat;
+    GLint location_rotMat1;
+    GLint location_rotMat2;
+    GLint location_rotMat3;
     GLint light_pos1;
     GLint light_pos2;
     GLint light_pos3;
@@ -142,7 +144,10 @@ int main(int argc, char *argv[]) {
     sphereID = glGetUniformLocation(sphereShader.programID, "MVP");
     planeID = glGetUniformLocation(planeShader.programID, "MVP");
     waterID = glGetUniformLocation(waterShader.programID, "MVP");
-    location_rotMat = glGetUniformLocation(sphereShader.programID, "rotMat");
+
+    location_rotMat1 = glGetUniformLocation(sphereShader.programID, "rotMat");
+    location_rotMat2 = glGetUniformLocation(planeShader.programID, "rotMat");
+    location_rotMat3 = glGetUniformLocation(waterShader.programID, "rotMat");
     
     light_pos1 = glGetUniformLocation(sphereShader.programID, "lightPos");
     light_pos2 = glGetUniformLocation(planeShader.programID, "lightPos");
@@ -217,7 +222,7 @@ int main(int argc, char *argv[]) {
         glUniformMatrix4fv(planeID, 1, GL_FALSE, &planeMVP[0][0]);
         glUniform3fv(light_pos2, 1, lightPos);
         glUniform3fv(eye_pos, 1, glm::value_ptr(camera.getPos()));
-        glUniformMatrix4fv(location_rotMat, 1, GL_FALSE, &rotMat[0][0]);
+        glUniformMatrix4fv(location_rotMat2, 1, GL_FALSE, &rotMat[0][0]);
 
         terrain.render();
         glUseProgram(0);
@@ -229,7 +234,7 @@ int main(int argc, char *argv[]) {
         glUniform1f(location_time , time); // Copy the value to the shader program
         glUniform3fv(light_pos1, 1, lightPos);
         glUniform3fv(eye_pos, 1, glm::value_ptr(camera.getPos()));
-        glUniformMatrix4fv(location_rotMat, 1, GL_FALSE, &rotMat[0][0]);
+        glUniformMatrix4fv(location_rotMat1, 1, GL_FALSE, &rotMat[0][0]);
         glUniformMatrix4fv(sphereID, 1, GL_FALSE, &sphereMVP[0][0]);
         
         sphere.render();
@@ -242,7 +247,7 @@ int main(int argc, char *argv[]) {
         glUniform3fv(light_pos3, 1, lightPos);
         glUniform1f(location_time , time); 
         glUniform3fv(eye_pos, 1, glm::value_ptr(camera.getPos()));
-        glUniformMatrix4fv(location_rotMat, 1, GL_FALSE, &rotMat[0][0]);
+        glUniformMatrix4fv(location_rotMat3, 1, GL_FALSE, &rotMat[0][0]);
         water.render();
 
         glUseProgram(0);

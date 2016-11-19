@@ -57,6 +57,7 @@ void main () {
 	float rand = fract(sin(dot(vec2(Position.x,Position.z) ,vec2(12.9898,78.233))) * 43758.5453);
 	float dist = abs(pow(Position.x, 2) + pow(Position.z, 2));
 	
+	/*
 	float distWater = abs(Position.x);
 	float water;
 	if (distWater < 1.7 + rand && abs(Position.z) < 3.0 + rand/10)
@@ -68,7 +69,20 @@ void main () {
 	{
 		offset = vec4(0.0, rand*dist/100, 0.0, 1.0);
 	}
-		
+	*/
+
+	float distWater = Position.z;
+	float water;
+	if (distWater < -5.0 + rand) // && abs(Position.x) < 3.0 + rand/10)
+	{
+		water = -abs(2.0 + distWater)*0.8 + abs(Position.x)/2.0;
+		offset = vec4(0.0, water , 0.0, 1.0);
+	}
+	else
+	{
+		offset = vec4(0.0, rand*dist/100, 0.0, 1.0);
+	}
+
 	interpolatedNormal = normal;
 	st = TexCoord;
 	pos = Position+vec3(offset);
