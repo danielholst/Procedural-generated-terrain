@@ -54,11 +54,12 @@ int main(int argc, char *argv[]) {
     // shaders
     Shader sphereShader;
     Shader planeShader;
-    Shader noiseShader;
+    Shader waterShader;
 
     // ID
     GLuint sphereID;
     GLuint planeID;
+    GLuint waterID;
     GLint location_time;
     GLint location_rotMat;
     GLint light_pos;
@@ -66,7 +67,7 @@ int main(int argc, char *argv[]) {
     
     //objects
     TriangleSoup sphere;
-    TriangleSoup plane;
+    TriangleSoup water;
     TriangleSoup terrain;
 
     // time
@@ -106,9 +107,11 @@ int main(int argc, char *argv[]) {
 
     sphereShader.createShader("sphereShaderVert.glsl", "sphereShaderFrag.glsl");
     planeShader.createShader("planeShaderVert.glsl", "planeShaderFrag.glsl");
+    waterShader.createShader("waterShaderVert.glsl", "waterShaderFrag.glsl");
 
     sphere.createSphere(10, 20);
     terrain.readOBJ("plane2.obj");
+    water.readOBJ("plane2.obj");
 
     // define light position
     float lightPos[3] = {0.0, 0.0, 9.9};
@@ -124,8 +127,10 @@ int main(int argc, char *argv[]) {
                  (float)width / (float)height, 0.1f, 100.0f),
                   glm::vec3(0.0, 0.3, 1.0), glm::vec3(0, 0, -1), glm::vec3(0.0f, 1.0f, 0.0f));
 
-    glm::mat4 Model = glm::translate(glm::vec3(0, 0.5, 0));
+    glm::mat4 Model = glm::translate(glm::vec3(0, 0.0, 0));
     glm::mat4 sphereMVP;
+    glm::mat4 waterTrans = glm::translate(glm::vec3(0, -0.2, 0));
+    glm::mat4 waterMVP;
     
 
     // fix plane trans TODO
@@ -134,13 +139,16 @@ int main(int argc, char *argv[]) {
 
     sphereID = glGetUniformLocation(sphereShader.programID, "MVP");
     planeID = glGetUniformLocation(planeShader.programID, "MVP");
+    waterID = glGetUniformLocation(waterShader.programID, "MVP");
     location_rotMat = glGetUniformLocation(sphereShader.programID, "rotMat");
     
     light_pos = glGetUniformLocation(sphereShader.programID, "lightPos");
     light_pos = glGetUniformLocation(planeShader.programID, "lightPos");
+    light_pos = glGetUniformLocation(waterShader.programID, "lightPos");
 
     eye_pos = glGetUniformLocation(planeShader.programID, "eyePosition");
     eye_pos = glGetUniformLocation(sphereShader.programID, "eyePosition");
+    eye_pos = glGetUniformLocation(waterShader.programID, "eyePosition");
 
     // Show some useful information on the GL context
     cout << "GL vendor:       " << glGetString(GL_VENDOR) << endl;
@@ -200,6 +208,7 @@ int main(int argc, char *argv[]) {
             camera.movePosUp();
         }
 
+
         // draw plane
         glUseProgram(planeShader.programID);
         planeMVP = camera.getMVPMatrix(planeTrans);
@@ -222,6 +231,17 @@ int main(int argc, char *argv[]) {
         glUniformMatrix4fv(sphereID, 1, GL_FALSE, &sphereMVP[0][0]);
         
         sphere.render();
+        glUseProgram(0);
+
+        // draw water
+        glUseProgram(waterShader.programID);
+        waterMVP = camera.getMVPMatrix(waterTrans);
+        glUniformMatrix4fv(waterID, 1, GL_FALSE, &waterMVP[0][0]);
+        glUniform3fv(light_pos, 1, lightPos);
+        glUniform3fv(eye_pos, 1, glm::value_ptr(camera.getPos()));
+        glUniformMatrix4fv(location_rotMat, 1, GL_FALSE, &rotMat[0][0]);
+        water.render();
+
         glUseProgram(0);
         
         // Swap buffers, i.e. display the image and prepare for next frame.
