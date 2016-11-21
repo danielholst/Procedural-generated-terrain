@@ -55,26 +55,32 @@ int main(int argc, char *argv[]) {
     Shader sphereShader;
     Shader planeShader;
     Shader waterShader;
+    Shader cloudShader;
 
     // ID
     GLuint sphereID;
     GLuint planeID;
     GLuint waterID;
-    GLint location_time;
+    GLuint cloudID;
+    GLint location_time1;
+    GLint location_time2;
     GLint location_rotMat1;
     GLint location_rotMat2;
     GLint location_rotMat3;
     GLint light_pos1;
     GLint light_pos2;
     GLint light_pos3;
+    GLuint light_pos4;
     GLint eye_pos1;
     GLint eye_pos2;
     GLint eye_pos3;
-    
+    GLuint eye_pos4;
+
     //objects
     TriangleSoup sphere;
     TriangleSoup water;
     TriangleSoup terrain;
+    TriangleSoup clouds;
 
     // time
     float time;  
@@ -115,11 +121,13 @@ int main(int argc, char *argv[]) {
     sphereShader.createShader("sphereShaderVert.glsl", "sphereShaderFrag.glsl");
     planeShader.createShader("planeShaderVert.glsl", "planeShaderFrag.glsl");
     waterShader.createShader("waterShaderVert.glsl", "waterShaderFrag.glsl");
+    cloudShader.createShader("cloudShaderVert.glsl", "cloudShaderFrag.glsl");
 
     // load objects
     sphere.createSphere(15, 40);
     terrain.readOBJ("plane2.obj");
     water.readOBJ("plane2.obj");
+    clouds.createSphere(14.5, 40);
 
     // define light position
     float lightPos[3] = {0.0, 4.0, 14.0};
@@ -132,6 +140,7 @@ int main(int argc, char *argv[]) {
     // transformation of objects
     glm::mat4 Model = glm::translate(glm::vec3(0, 0.0, 0));
     glm::mat4 sphereMVP;
+
     glm::mat4 waterTrans = glm::translate(glm::vec3(0, -0.4, -8.0));
     waterTrans += glm::scale(glm::vec3(3.0, 1.0, 1.5));
     glm::mat4 waterMVP;
@@ -140,24 +149,32 @@ int main(int argc, char *argv[]) {
     planeTrans += glm::scale(glm::vec3(1.5, 1.0, 3.0));
     glm::mat4 planeMVP;
 
+    glm::mat4 cloudTrans = glm::translate(glm::vec3(0, 0.0, 0));
+    glm::mat4 cloudMVP;
+
     // set uniforms
     sphereID = glGetUniformLocation(sphereShader.programID, "MVP");
     planeID = glGetUniformLocation(planeShader.programID, "MVP");
     waterID = glGetUniformLocation(waterShader.programID, "MVP");
+    cloudID = glGetUniformLocation(cloudShader.programID, "MVP");
 
     location_rotMat1 = glGetUniformLocation(sphereShader.programID, "rotMat");
     location_rotMat2 = glGetUniformLocation(planeShader.programID, "rotMat");
     location_rotMat3 = glGetUniformLocation(waterShader.programID, "rotMat");
-    
+    //location_rotMat4 = glGetUniformLocation(cloudShader.programID, "rotMat");
+
     light_pos1 = glGetUniformLocation(sphereShader.programID, "lightPos");
     light_pos2 = glGetUniformLocation(planeShader.programID, "lightPos");
     light_pos3 = glGetUniformLocation(waterShader.programID, "lightPos");
+    light_pos4 = glGetUniformLocation(cloudShader.programID, "lightPos");
 
     eye_pos1 = glGetUniformLocation(sphereShader.programID, "eyePosition");
     eye_pos2 = glGetUniformLocation(planeShader.programID, "eyePosition");
     eye_pos3 = glGetUniformLocation(waterShader.programID, "eyePosition");
+    eye_pos4 = glGetUniformLocation(cloudShader.programID, "eyePosition");
 
-    location_time = glGetUniformLocation(waterShader.programID, "time");
+    location_time1 = glGetUniformLocation(waterShader.programID, "time");
+    location_time2 = glGetUniformLocation(cloudShader.programID, "time");
 
     // Show some useful information on the GL context
     cout << "GL vendor:       " << glGetString(GL_VENDOR) << endl;
@@ -249,11 +266,22 @@ int main(int argc, char *argv[]) {
         waterMVP = camera.getMVPMatrix(waterTrans);
         glUniformMatrix4fv(waterID, 1, GL_FALSE, &waterMVP[0][0]);
         glUniform3fv(light_pos3, 1, lightPos);
-        glUniform1f(location_time , time); 
+        glUniform1f(location_time1 , time); 
         glUniform3fv(eye_pos3, 1, glm::value_ptr(camera.getPos()));
         glUniformMatrix4fv(location_rotMat3, 1, GL_FALSE, &rotMat[0][0]);
         water.render();
 
+        glUseProgram(0);
+
+        // draw clouds
+        glUseProgram(cloudShader.programID);
+        cloudMVP = camera.getMVPMatrix(cloudTrans);
+        glUniformMatrix4fv(cloudID, 1, GL_FALSE, &cloudMVP[0][0]);
+        glUniform3fv(light_pos4, 1, lightPos);
+        glUniform1f(location_time2 , time); 
+        glUniform3fv(eye_pos4, 1, glm::value_ptr(camera.getPos()));
+        //glUniformMatrix4fv(location_rotMat4, 1, GL_FALSE, &rotMat[0][0]);
+        clouds.render();
         glUseProgram(0);
         
         // Swap buffers, i.e. display the image and prepare for next frame.
