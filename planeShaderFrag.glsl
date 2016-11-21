@@ -209,7 +209,7 @@ void main () {
 	//light = light*rotMat;
 	vec3 colorGreen = vec3(0.2,0.6,0.2);
 	vec3 colorBrown = vec3(0.93, 0.81,0.63); //238;207;161
-
+	vec3 addColor = vec3(0);
 	// Bump map surface
 	vec3 grad = vec3(0.0); // To store gradient of noise
 	vec3 gradtemp = vec3(0.0); // Temporary gradient for fractal sum
@@ -247,10 +247,15 @@ void main () {
 	// Cosine of the angle between the Eye vector and the Reflect vector,
 	float cosAlpha = clamp( dot( E,R ), 0,1 );
 
+	if (pos.y < 0)
+		addColor = colorBrown * abs(pos.y);
+	if (pos.y > 0)
+		addColor = vec3(1.0, 1.0, 1.0)*pos.y/3;
+
 	color = MaterialAmbientColor
 	+ MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance)
 	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)
-	+ vec3(1.0, 1.0, 1.0)*pos.y/3;
+	+ addColor;
 
 
 	//finalcolor = texture(tex, st) * vec4 (vec3(interpolatedNormal), 1.0);

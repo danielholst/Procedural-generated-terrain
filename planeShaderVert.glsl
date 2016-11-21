@@ -20,7 +20,7 @@ vec3 getNewPos(vec2 pos)
 	float rand = fract(sin(dot(pos ,vec2(12.9898,78.233))) * 43758.5453);
 	float dist = abs(pow(pos.x, 2) + pow(pos.y, 2));
 
-	vec3 newPos = vec3(pos.x, rand*dist/100, pos.y);
+	vec3 newPos = vec3(pos.x, rand*dist/10, pos.y);
 	return newPos;
 }
 

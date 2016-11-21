@@ -131,16 +131,18 @@ int main(int argc, char *argv[]) {
     //camera
     Camera camera(glm::perspective(glm::radians(45.0f),
                  (float)width / (float)height, 0.1f, 100.0f),
-                  glm::vec3(0.0, 0.3, 1.0), glm::vec3(0, 0, -1), glm::vec3(0.0f, 1.0f, 0.0f));
+                  glm::vec3(0.0, 0.3, -5.0), glm::vec3(0, 0, 1), glm::vec3(0.0f, 1.0f, 0.0f));
 
     glm::mat4 Model = glm::translate(glm::vec3(0, 0.0, 0));
     glm::mat4 sphereMVP;
-    glm::mat4 waterTrans = glm::translate(glm::vec3(0, -0.2, 0));
+    glm::mat4 waterTrans = glm::translate(glm::vec3(0, -0.4, -4.0));
+    waterTrans += glm::scale(glm::vec3(1.5, 1.0, 1.5));
     glm::mat4 waterMVP;
     
 
     // fix plane trans TODO
     glm::mat4 planeTrans = glm::translate(glm::vec3(0, 0, 4.0));
+    planeTrans += glm::scale(glm::vec3(1.5, 1.0, 1.5));
     glm::mat4 planeMVP;
 
     sphereID = glGetUniformLocation(sphereShader.programID, "MVP");
