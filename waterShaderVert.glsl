@@ -4,6 +4,7 @@ layout(location = 0) in vec3 Position;
 layout ( location =1) in vec3 Normal;
 layout ( location =2) in vec2 TexCoord;
 
+uniform float time;
 uniform mat4 MVP;
 uniform vec3 lightPos;
 uniform vec3 eyePosition;
@@ -16,8 +17,8 @@ float delta = 0.3;
 
 vec3 getNewPos(vec2 pos)
 {
-	float rand = fract(sin(dot(pos ,vec2(12.9898,78.233))) * 43758.5453);
-	vec3 newPos = vec3(pos.x, rand/100, pos.y);
+	//float rand = fract(sin(dot(pos ,vec2(12.9898,78.233))) * 43758.5453);
+	vec3 newPos = vec3(pos.x, sin(pos.y - time)/8.0, pos.y);
 	return newPos;
 }
 
@@ -48,16 +49,17 @@ void main () {
 	vec3 dx = (getNewPos(posXp) - getNewPos(posXm))/(2*delta);
 	vec3 dz = (getNewPos(posZp) - getNewPos(posZm))/(2*delta);
 
-	//vec3 normal = normalize(cross(dx, dz));
+	vec3 normal = normalize(cross(dx, dz));
 
 	// distance to center
 	float rand = fract(sin(dot(vec2(Position.x,Position.z) ,vec2(12.9898,78.233))) * 43758.5453);
 	
-	offset = vec4(0.0, rand/100, 0.0, 1.0);
-		
-	interpolatedNormal = Normal;
+	offset = vec4(0.0, sin(Position.z - 2.0*time)/8.0, 0.0, 1.0);
+	//offset += vec4(0.0, sin(rand*time)/30, 0.0, 0.0);
+	offset += vec4(0.0, cos(Position.x + time)/20, 0.0, 1.0);
+	interpolatedNormal = normal;
 	st = TexCoord;
-	pos = Position; //+vec3(offset);
+	pos = Position+vec3(offset);
 	
-	gl_Position =  MVP * (vec4 (Position, 1.0));
+	gl_Position =  MVP * (vec4 (Position, 1.0)+ offset);
 }

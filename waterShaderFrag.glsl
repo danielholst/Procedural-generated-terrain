@@ -1,19 +1,20 @@
 #version 330 core
 
-uniform float time;
+
 
 in vec3 pos;
 in vec3 interpolatedNormal;
 in vec2 st;
 
+uniform float time;
 uniform sampler2D tex;
 uniform mat4 rotMat;
 uniform vec3 lightPos;
 uniform vec3 eyePosition;
 
 //vec3 lightPos = vec3(0.0, 4.0, 2.0);
-vec3 LightColor = vec3(0.6,0.7,0.6);
-float LightPower = 5.0;
+vec3 LightColor = vec3(0.9,0.9,0.9);
+float LightPower = 30.0;
 
 
 //out vec4 finalcolor;
@@ -205,20 +206,22 @@ float snoise(vec3 v, out vec3 gradient)
 // main
 void main () {
 
+	//vec4 light = vec4(3.0, 6.0, -3.0, 0.1);
 	vec4 light = vec4(lightPos, 1);
-	light = light*rotMat;
+	//light = light*rotMat;
 	vec3 colorBlue = vec3(0.0,0.2,0.8);
-	vec3 colorLightBlue = vec3(0.0, 0.4,0.8);
+	vec3 colorLightBlue = vec3(0.0, 0.5,0.9);
+	vec3 colorWhite = vec3(0.9, 0.9, 0.9);
 
 	// Bump map surface
 	vec3 grad = vec3(0.0); // To store gradient of noise
 	vec3 gradtemp = vec3(0.0); // Temporary gradient for fractal sum
-	float bump = 5* snoise(2.0 - pos*2* time, grad);
-	grad *= 10; // Scale gradient with inner derivative
-	bump += 0.5 * snoise(pos*10.0, gradtemp);
-	grad += 5.0 * gradtemp; // Same influence (double freq, half amp)
-	//bump += 0.25 * snoise(pos*40.0, gradtemp);
-	//grad += 10.0 * gradtemp; // Same influence (double freq, half amp)
+	float bump = 0.2 * snoise(2*pos, grad) + 0.5;
+	grad *= 0.4; // Scale gradient with inner derivative
+	bump += 0.5 * snoise(pos*4.0, gradtemp);
+	grad += 2.0 * gradtemp; // Same influence (double freq, half amp)
+	bump += 0.25 * snoise(pos*10.0, gradtemp);
+	grad += 4.0 * gradtemp; // Same influence (double freq, half amp)
 	
 	// Perturb normal
 	vec3 perturbation = grad - dot(grad, interpolatedNormal) * interpolatedNormal;
@@ -227,7 +230,7 @@ void main () {
 
 	// Material properties
 	vec3 MaterialDiffuseColor = mix(colorBlue, colorLightBlue, 0.5);
-	vec3 MaterialAmbientColor = vec3(0.2,0.2,0.2) * MaterialDiffuseColor;
+	vec3 MaterialAmbientColor = vec3(0.5,0.5,0.5) * MaterialDiffuseColor;
 	vec3 MaterialSpecularColor = vec3(0.9,0.9,0.9);
 	
 	// Distance to the light
@@ -248,8 +251,10 @@ void main () {
 	float cosAlpha = clamp( dot( E,R ), 0,1 );
 
 	color = vec4(vec3(MaterialAmbientColor
+	//+ vec3(0.2, 0.2, 0.2)
+	//+ colorWhite * pos.y/2.0
 	+ MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance)
-	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)), 0.0);
+	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)), 0.3);
 
 
 	//finalcolor = texture(tex, st) * vec4 (vec3(interpolatedNormal), 1.0);

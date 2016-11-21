@@ -12,7 +12,7 @@ uniform vec3 lightPos;
 uniform vec3 eyePosition;
 
 //vec3 lightPos = vec3(0.0, 4.0, 2.0);
-vec3 LightColor = vec3(0.6,0.7,0.6);
+vec3 LightColor = vec3(0.7,0.7,0.7);
 float LightPower = 5.0;
 
 
@@ -206,7 +206,7 @@ float snoise(vec3 v, out vec3 gradient)
 void main () {
 
 	vec4 light = vec4(lightPos, 1);
-	light = light*rotMat;
+	//light = light*rotMat;
 	vec3 colorGreen = vec3(0.2,0.6,0.2);
 	vec3 colorBrown = vec3(0.93, 0.81,0.63); //238;207;161
 

@@ -67,7 +67,9 @@ int main(int argc, char *argv[]) {
     GLint light_pos1;
     GLint light_pos2;
     GLint light_pos3;
-    GLint eye_pos;
+    GLint eye_pos1;
+    GLint eye_pos2;
+    GLint eye_pos3;
     
     //objects
     TriangleSoup sphere;
@@ -118,7 +120,7 @@ int main(int argc, char *argv[]) {
     water.readOBJ("plane2.obj");
 
     // define light position
-    float lightPos[3] = {0.0, 0.0, 9.9};
+    float lightPos[3] = {0.0, 6.0, -7.0};
 
     // send time to shader
     location_time = glGetUniformLocation(waterShader.programID, "time");
@@ -138,7 +140,7 @@ int main(int argc, char *argv[]) {
     
 
     // fix plane trans TODO
-    glm::mat4 planeTrans = glm::translate(glm::vec3(0, 0, 0));
+    glm::mat4 planeTrans = glm::translate(glm::vec3(0, 0, 4.0));
     glm::mat4 planeMVP;
 
     sphereID = glGetUniformLocation(sphereShader.programID, "MVP");
@@ -153,9 +155,9 @@ int main(int argc, char *argv[]) {
     light_pos2 = glGetUniformLocation(planeShader.programID, "lightPos");
     light_pos3 = glGetUniformLocation(waterShader.programID, "lightPos");
 
-    eye_pos = glGetUniformLocation(planeShader.programID, "eyePosition");
-    eye_pos = glGetUniformLocation(sphereShader.programID, "eyePosition");
-    eye_pos = glGetUniformLocation(waterShader.programID, "eyePosition");
+    eye_pos1 = glGetUniformLocation(sphereShader.programID, "eyePosition");
+    eye_pos2 = glGetUniformLocation(planeShader.programID, "eyePosition");
+    eye_pos3 = glGetUniformLocation(waterShader.programID, "eyePosition");
 
     // Show some useful information on the GL context
     cout << "GL vendor:       " << glGetString(GL_VENDOR) << endl;
@@ -166,6 +168,9 @@ int main(int argc, char *argv[]) {
 
     glfwSwapInterval(0); 
     glEnable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // Main loop
     while(!glfwWindowShouldClose(window))
     {
@@ -215,29 +220,28 @@ int main(int argc, char *argv[]) {
             camera.movePosUp();
         }
 
+        // draw sphere
+        glUseProgram(sphereShader.programID);
+        sphereMVP = camera.getMVPMatrix(Model);
+        
+        //glUniform1f(location_time , time); // Copy the value to the shader program
+        glUniform3fv(light_pos1, 1, lightPos);
+        glUniform3fv(eye_pos1, 1, glm::value_ptr(camera.getPos()));
+        glUniformMatrix4fv(location_rotMat1, 1, GL_FALSE, &rotMat[0][0]);
+        glUniformMatrix4fv(sphereID, 1, GL_FALSE, &sphereMVP[0][0]);
+        
+        sphere.render();
+        glUseProgram(0);
 
         // draw plane
         glUseProgram(planeShader.programID);
         planeMVP = camera.getMVPMatrix(planeTrans);
         glUniformMatrix4fv(planeID, 1, GL_FALSE, &planeMVP[0][0]);
         glUniform3fv(light_pos2, 1, lightPos);
-        glUniform3fv(eye_pos, 1, glm::value_ptr(camera.getPos()));
+        glUniform3fv(eye_pos2, 1, glm::value_ptr(camera.getPos()));
         glUniformMatrix4fv(location_rotMat2, 1, GL_FALSE, &rotMat[0][0]);
 
         terrain.render();
-        glUseProgram(0);
-
-        // draw sphere
-        glUseProgram(sphereShader.programID);
-        sphereMVP = camera.getMVPMatrix(Model);
-        
-        glUniform1f(location_time , time); // Copy the value to the shader program
-        glUniform3fv(light_pos1, 1, lightPos);
-        glUniform3fv(eye_pos, 1, glm::value_ptr(camera.getPos()));
-        glUniformMatrix4fv(location_rotMat1, 1, GL_FALSE, &rotMat[0][0]);
-        glUniformMatrix4fv(sphereID, 1, GL_FALSE, &sphereMVP[0][0]);
-        
-        sphere.render();
         glUseProgram(0);
 
         // draw water
@@ -246,7 +250,7 @@ int main(int argc, char *argv[]) {
         glUniformMatrix4fv(waterID, 1, GL_FALSE, &waterMVP[0][0]);
         glUniform3fv(light_pos3, 1, lightPos);
         glUniform1f(location_time , time); 
-        glUniform3fv(eye_pos, 1, glm::value_ptr(camera.getPos()));
+        glUniform3fv(eye_pos3, 1, glm::value_ptr(camera.getPos()));
         glUniformMatrix4fv(location_rotMat3, 1, GL_FALSE, &rotMat[0][0]);
         water.render();
 

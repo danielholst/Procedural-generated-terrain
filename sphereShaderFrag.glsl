@@ -10,7 +10,7 @@ in vec3 interpolatedNormal;
 in vec2 st;
 in vec3 pos;
 
-vec3 LightColor = vec3(0.6,0.7,0.6);
+vec3 LightColor = vec3(0.7,0.7,0.7);
 float LightPower = 10.0;
 
 out vec3 color;
@@ -20,7 +20,7 @@ void main () {
 	vec4 mat = vec4(0.1, 0.1, 0.8, 1.0) + vec4 (vec3(interpolatedNormal)*vec3(0,0,1), 1.0) ;
 
 	vec4 light = vec4(lightPos, 1);
-	light =  rotMat * light;
+	//light =  rotMat * light;
 
 	// Material properties
 	vec3 MaterialDiffuseColor = vec3(mat);

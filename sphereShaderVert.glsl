@@ -13,13 +13,10 @@ out vec3 interpolatedNormal;
 out vec2 st;
 out vec3 pos;
 
-vec3 viewPos = vec3(0.0, 0.0, 1.0);
-//vec3 lightPos = vec3(4.0, 2.0, 2.0);
-
 void main () {
 		
 		interpolatedNormal = Normal;
 		st = TexCoord;
 		pos = Position;
-		gl_Position = MVP * rotMat * vec4 (Position , 1.0);
+		gl_Position = MVP * vec4 (Position , 1.0);
 }
