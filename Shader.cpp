@@ -87,7 +87,7 @@ void Shader::createShader(const char *vertexshaderfile, const char *fragmentshad
     if(fragmentCompiled == GL_FALSE)
    	{
         glGetShaderInfoLog(fragmentShader, sizeof(str), NULL, str);
-        printError("Fragment shader compile error", str);
+        printError("Fragment shader compile error ", str);
     }
 
     // Create a program object and attach the two compiled shaders.

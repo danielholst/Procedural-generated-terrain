@@ -10,22 +10,22 @@ in vec3 interpolatedNormal;
 in vec2 st;
 in vec3 pos;
 
-vec3 LightColor = vec3(0.7,0.7,0.7);
+vec3 LightColor = vec3(0.9,0.9,0.9);
 float LightPower = 10.0;
 
 out vec3 color;
 
 void main () {
 
-	vec4 mat = vec4(0.1, 0.1, 0.8, 1.0) + vec4 (vec3(interpolatedNormal)*vec3(0,0,1), 1.0) ;
+	vec4 mat = vec4(0.1, 0.5, 0.8, 1.0);// + vec4 (vec3(interpolatedNormal)*vec3(0,0,1), 1.0) ;
 
 	vec4 light = vec4(lightPos, 1);
 	//light =  rotMat * light;
 
 	// Material properties
 	vec3 MaterialDiffuseColor = vec3(mat);
-	vec3 MaterialAmbientColor = vec3(0.2, 0.2, 0.2) * MaterialDiffuseColor;
-	vec3 MaterialSpecularColor = vec3(0.8, 0.8, 0.8) * MaterialDiffuseColor;
+	vec3 MaterialAmbientColor = vec3(0.5, 0.5, 0.5) * MaterialDiffuseColor;
+	vec3 MaterialSpecularColor = vec3(0.9, 0.9, 0.9) * MaterialDiffuseColor;
 	
 	// Distance to the light
 	float distance = length(vec3(light) - pos);

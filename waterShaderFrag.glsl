@@ -254,7 +254,7 @@ void main () {
 	//+ vec3(0.2, 0.2, 0.2)
 	//+ colorWhite * pos.y/2.0
 	+ MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance)
-	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)), 0.3);
+	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)), 0.5);
 
 
 	//finalcolor = texture(tex, st) * vec4 (vec3(interpolatedNormal), 1.0);

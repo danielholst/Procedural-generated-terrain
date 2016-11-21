@@ -76,11 +76,11 @@ void main () {
 	if (distWater < -3.0 + rand && (-Position.z > Position.x ))
 	{
 		water = -abs(2.0 + distWater)*0.8; // + abs(Position.x)/2.0;
-		offset = vec4(0.0, water/3.0 , 0.0, 1.0);
+		offset = vec4(0.0, clamp(water/2.0, -1.0, 0.0) , 0.0, 1.0);
 	}
 	else
 	{
-		offset = vec4(0.0, rand*dist/150, 0.0, 1.0);
+		offset = vec4(0.0, rand*dist/100, 0.0, 1.0);
 	}
 
 	interpolatedNormal = normal;

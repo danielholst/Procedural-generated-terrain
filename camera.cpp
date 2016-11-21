@@ -49,22 +49,22 @@ void Camera::movePosDown()
 
 void Camera::movePosLeft()
 {
-	position = glm::vec3(position.x - 0.01, position.y, position.z);
+	position = glm::vec3(position.x + 0.01, position.y, position.z);
 }
 
 void Camera::movePosRight()
 {
-	position = glm::vec3(position.x + 0.01, position.y, position.z);
+	position = glm::vec3(position.x - 0.01, position.y, position.z);
 }
 
 void Camera::movePosBack()
 {
-	position = glm::vec3(position.x, position.y, position.z + 0.01);
+	position = glm::vec3(position.x, position.y, position.z - 0.01);
 }
 
 void Camera::movePosForth()
 {
-	position = glm::vec3(position.x, position.y, position.z - 0.01);
+	position = glm::vec3(position.x, position.y, position.z + 0.01);
 }
 
 void Camera::rotateRight()

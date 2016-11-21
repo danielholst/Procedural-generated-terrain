@@ -111,40 +111,36 @@ int main(int argc, char *argv[]) {
     // Make the newly created window the "current context" for OpenGL
     glfwMakeContextCurrent(window);
 
+    // create shaders
     sphereShader.createShader("sphereShaderVert.glsl", "sphereShaderFrag.glsl");
     planeShader.createShader("planeShaderVert.glsl", "planeShaderFrag.glsl");
     waterShader.createShader("waterShaderVert.glsl", "waterShaderFrag.glsl");
 
-    sphere.createSphere(10, 20);
+    // load objects
+    sphere.createSphere(15, 40);
     terrain.readOBJ("plane2.obj");
     water.readOBJ("plane2.obj");
 
     // define light position
-    float lightPos[3] = {0.0, 6.0, -7.0};
-
-    // send time to shader
-    location_time = glGetUniformLocation(waterShader.programID, "time");
-    if( location_time == -1) { // If the variable is not found , -1 is returned
-        cout << " Unable to locate variable ✬time ✬ in shader !" << endl ;
-    }
+    float lightPos[3] = {0.0, 4.0, 14.0};
 
     //camera
     Camera camera(glm::perspective(glm::radians(45.0f),
                  (float)width / (float)height, 0.1f, 100.0f),
                   glm::vec3(0.0, 0.3, -5.0), glm::vec3(0, 0, 1), glm::vec3(0.0f, 1.0f, 0.0f));
 
+    // transformation of objects
     glm::mat4 Model = glm::translate(glm::vec3(0, 0.0, 0));
     glm::mat4 sphereMVP;
-    glm::mat4 waterTrans = glm::translate(glm::vec3(0, -0.4, -4.0));
-    waterTrans += glm::scale(glm::vec3(1.5, 1.0, 1.5));
+    glm::mat4 waterTrans = glm::translate(glm::vec3(0, -0.4, -8.0));
+    waterTrans += glm::scale(glm::vec3(3.0, 1.0, 1.5));
     glm::mat4 waterMVP;
     
-
-    // fix plane trans TODO
     glm::mat4 planeTrans = glm::translate(glm::vec3(0, 0, 4.0));
-    planeTrans += glm::scale(glm::vec3(1.5, 1.0, 1.5));
+    planeTrans += glm::scale(glm::vec3(1.5, 1.0, 3.0));
     glm::mat4 planeMVP;
 
+    // set uniforms
     sphereID = glGetUniformLocation(sphereShader.programID, "MVP");
     planeID = glGetUniformLocation(planeShader.programID, "MVP");
     waterID = glGetUniformLocation(waterShader.programID, "MVP");
@@ -160,6 +156,8 @@ int main(int argc, char *argv[]) {
     eye_pos1 = glGetUniformLocation(sphereShader.programID, "eyePosition");
     eye_pos2 = glGetUniformLocation(planeShader.programID, "eyePosition");
     eye_pos3 = glGetUniformLocation(waterShader.programID, "eyePosition");
+
+    location_time = glGetUniformLocation(waterShader.programID, "time");
 
     // Show some useful information on the GL context
     cout << "GL vendor:       " << glGetString(GL_VENDOR) << endl;
