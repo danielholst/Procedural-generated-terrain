@@ -217,14 +217,20 @@ void main () {
 	vec3 gradtemp = vec3(0.0); // Temporary gradient for fractal sum
 	float bump = snoise(pos*10.0, grad);
 	grad *= 10.0; // Scale gradient with inner derivative
-	bump += 0.5 * snoise(pos*20.0, gradtemp);
-	grad += 10.0 * gradtemp; // Same influence (double freq, half amp)
-	bump += 0.25 * snoise(pos*40.0, gradtemp);
-	grad += 10.0 * gradtemp; // Same influence (double freq, half amp)
 	
+
+  if ( pos.y < 5.0) 
+  {
+    bump += 0.5 * snoise(pos*20.0, gradtemp);
+    grad += 10.0 * gradtemp; // Same influence (double freq, half amp)
+    bump += 0.25 * snoise(pos*40.0, gradtemp);
+	  grad += 10.0 * gradtemp; // Same influence (double freq, half amp)
+	}
+  
 	// Perturb normal
 	vec3 perturbation = grad - dot(grad, interpolatedNormal) * interpolatedNormal;
 	vec3 norm = interpolatedNormal -  0.2 * perturbation;
+
 
 
 	// Material properties
@@ -251,12 +257,12 @@ void main () {
 
 	if (pos.y < 0)
 		addColor = colorBrown * abs(pos.y);
-	if (pos.y > 0.5)
-		addColor = colorGrey*(pos.y - 0.5);
+	if (pos.y > 0.0)
+		addColor = clamp(colorBrown*(pos.y)/5.0, 0.0, 0.5);
 
 	color = MaterialAmbientColor
 	+ MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance)
-	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)
+	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)/10.0
 	+ addColor;
 
 

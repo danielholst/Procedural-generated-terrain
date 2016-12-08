@@ -203,6 +203,7 @@ void main () {
 	vec4 mat = vec4(0.9, 0.9, 0.9, 1.0);// + vec4 (vec3(interpolatedNormal)*vec3(0,0,1), 1.0) ;
 
 	vec4 light = vec4(lightPos, 1);
+	vec3 rainbow = vec3(0);
 	//light =  rotMat * light;
 
 	vec3 grad = vec3(0.0); // To store gradient of noise
@@ -235,7 +236,19 @@ void main () {
 	// Cosine of the angle between the Eye vector and the Reflect vector,
 	float cosAlpha = clamp( dot( E,R ), 0,1 );
 
+/*
+	// create rainbow
+	if ( pos.z > 10.0 && pos.z < 10.2)
+		rainbow = vec3(1.0 , 0.0, 0.0);
+	if ( pos.z > 10.2 && pos.z < 10.4)
+		rainbow = vec3(1.0, 1.0, 0.0);
+	if ( pos.z > 10.4 && pos.z < 10.6)
+		rainbow = vec3(0.0, 1.0, 1.0);
+	if ( pos.z > 10.6 && pos.z < 10.8)
+		rainbow = vec3(0.0, 0.0, 1.0);
+*/
 	color = vec4(MaterialAmbientColor
+	+ rainbow
 	+ MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance)
 	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance), 0.03);
 }

@@ -1,25 +1,3 @@
-/*
- * A C++ framework for OpenGL programming in TNM046 for MT1 2014.
- *
- * This is a small, limited framework, designed to be easy to use
- * for students in an introductory computer graphics course in
- * the first year of a M Sc curriculum. It uses custom code
- * for some things that are better solved by external libraries
- * like GLEW and GLM, but the emphasis is on simplicity and
- * readability, not generality.
- * For the window management, GLFW 3.0 is used for convenience.
- * The framework should work in Windows, MacOS X and Linux.
- * Some Windows-specific stuff for extension loading is still
- * here. GLEW could have been used instead, but for clarity
- * and minimal dependence on other code, we rolled our own extension
- * loading for the things we need. That code is short-circuited on
- * platforms other than Windows. This code is dependent only on
- * the GLFW and OpenGL libraries. OpenGL 3.3 or higher is required.
- *
- * Author: Stefan Gustavson (stegu@itn.liu.se) 2013-2014
- * This code is in the public domain.
- */
-
 // File and console I/O for logging and error reporting
 #include <iostream>
 #include "TriangleSoup.hpp"
@@ -56,31 +34,38 @@ int main(int argc, char *argv[]) {
     Shader planeShader;
     Shader waterShader;
     Shader cloudShader;
+    Shader floatingShader;
 
     // ID
     GLuint sphereID;
     GLuint planeID;
     GLuint waterID;
     GLuint cloudID;
+    GLuint floatingID;
     GLint location_time1;
     GLint location_time2;
+    GLint location_time3;
     GLint location_rotMat1;
     GLint location_rotMat2;
     GLint location_rotMat3;
+    GLint location_rotMat4;
     GLint light_pos1;
     GLint light_pos2;
     GLint light_pos3;
     GLuint light_pos4;
+    GLuint light_pos5;
     GLint eye_pos1;
     GLint eye_pos2;
     GLint eye_pos3;
     GLuint eye_pos4;
+    GLuint eye_pos5;
 
     //objects
     TriangleSoup sphere;
     TriangleSoup water;
     TriangleSoup terrain;
     TriangleSoup clouds;
+    TriangleSoup floating;
 
     // time
     float time;  
@@ -122,15 +107,17 @@ int main(int argc, char *argv[]) {
     planeShader.createShader("planeShaderVert.glsl", "planeShaderFrag.glsl");
     waterShader.createShader("waterShaderVert.glsl", "waterShaderFrag.glsl");
     cloudShader.createShader("cloudShaderVert.glsl", "cloudShaderFrag.glsl");
+    floatingShader.createShader("floatingShaderVert.glsl", "floatingShaderFrag.glsl");
 
     // load objects
     sphere.createSphere(15, 40);
     terrain.readOBJ("plane2.obj");
     water.readOBJ("plane2.obj");
     clouds.createSphere(14.5, 40);
+    floating.createSphere(0.2, 20);
 
     // define light position
-    float lightPos[3] = {0.0, 4.0, 14.0};
+    float lightPos[3] = {-2.0, 5.0, 11.0};
 
     //camera
     Camera camera(glm::perspective(glm::radians(45.0f),
@@ -152,29 +139,37 @@ int main(int argc, char *argv[]) {
     glm::mat4 cloudTrans = glm::translate(glm::vec3(0, 0.0, 0));
     glm::mat4 cloudMVP;
 
+    glm::mat4 floatingTrans = glm::translate(glm::vec3(0.0, 0.0, -4.0));
+    glm::mat4 floatingMVP;
+
     // set uniforms
     sphereID = glGetUniformLocation(sphereShader.programID, "MVP");
     planeID = glGetUniformLocation(planeShader.programID, "MVP");
     waterID = glGetUniformLocation(waterShader.programID, "MVP");
     cloudID = glGetUniformLocation(cloudShader.programID, "MVP");
+    floatingID = glGetUniformLocation(floatingShader.programID, "MVP");
 
     location_rotMat1 = glGetUniformLocation(sphereShader.programID, "rotMat");
     location_rotMat2 = glGetUniformLocation(planeShader.programID, "rotMat");
     location_rotMat3 = glGetUniformLocation(waterShader.programID, "rotMat");
+    location_rotMat4 = glGetUniformLocation(floatingShader.programID, "rotMat");
     //location_rotMat4 = glGetUniformLocation(cloudShader.programID, "rotMat");
 
     light_pos1 = glGetUniformLocation(sphereShader.programID, "lightPos");
     light_pos2 = glGetUniformLocation(planeShader.programID, "lightPos");
     light_pos3 = glGetUniformLocation(waterShader.programID, "lightPos");
     light_pos4 = glGetUniformLocation(cloudShader.programID, "lightPos");
+    light_pos5 = glGetUniformLocation(floatingShader.programID, "lightPos");
 
     eye_pos1 = glGetUniformLocation(sphereShader.programID, "eyePosition");
     eye_pos2 = glGetUniformLocation(planeShader.programID, "eyePosition");
     eye_pos3 = glGetUniformLocation(waterShader.programID, "eyePosition");
     eye_pos4 = glGetUniformLocation(cloudShader.programID, "eyePosition");
+    eye_pos5 = glGetUniformLocation(floatingShader.programID, "eyePosition");
 
     location_time1 = glGetUniformLocation(waterShader.programID, "time");
     location_time2 = glGetUniformLocation(cloudShader.programID, "time");
+    location_time3 = glGetUniformLocation(floatingShader.programID, "time");
 
     // Show some useful information on the GL context
     cout << "GL vendor:       " << glGetString(GL_VENDOR) << endl;
@@ -271,6 +266,16 @@ int main(int argc, char *argv[]) {
         glUniformMatrix4fv(location_rotMat3, 1, GL_FALSE, &rotMat[0][0]);
         water.render();
 
+        glUseProgram(0);
+
+        // draw floating sphere
+        glUseProgram(floatingShader.programID);
+        floatingMVP = camera.getMVPMatrix(floatingTrans);
+        glUniformMatrix4fv(floatingID, 1, GL_FALSE, &floatingMVP[0][0]);
+        glUniform3fv(light_pos5, 1, lightPos);
+        glUniform1f(location_time3 , time); 
+        glUniform3fv(eye_pos5, 1, glm::value_ptr(camera.getPos()));
+        floating.render();
         glUseProgram(0);
 
         // draw clouds
