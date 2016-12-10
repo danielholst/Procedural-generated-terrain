@@ -13,12 +13,14 @@ out vec3 interpolatedNormal;
 out vec2 st;
 out vec3 pos;
 
-float delta = 0.3;
+float delta = 0.001;
 
 vec3 getNewPos(vec2 pos)
 {
-	//float rand = fract(sin(dot(pos ,vec2(12.9898,78.233))) * 43758.5453);
-	vec3 newPos = vec3(pos.x, sin(pos.y - time)/8.0, pos.y);
+
+	vec3 newPos = vec3(pos.x,
+		 		  sin(pos.y - 2.0*time)/8.0 + cos(Position.x + time)/20, 
+		 	      pos.y);
 	return newPos;
 }
 
@@ -28,22 +30,27 @@ void main () {
 
   	// to recalculate normals, check neighbors in x and z and get dx, dy.
   	// then N^ =  normalize(N0 - g -(g dot N0)N0)
+  	vec2 currPos = vec2(Position.x, Position.z);
 	vec2 posXp = vec2(Position.x + delta, Position.z);
-	vec2 posXm = vec2(Position.x - delta, Position.z);
+	//vec2 posXm = vec2(Position.x - delta, Position.z);
 	vec2 posZp = vec2(Position.x, Position.z + delta);
-	vec2 posZm = vec2(Position.x, Position.z - delta);
+	//vec2 posZm = vec2(Position.x, Position.z - delta);
 
-	vec3 dx = (getNewPos(posXp) - getNewPos(posXm))/(2*delta);
-	vec3 dz = (getNewPos(posZp) - getNewPos(posZm))/(2*delta);
+	vec3 dx = (getNewPos(posXp) - getNewPos(currPos))/(delta);
+	vec3 dz = (getNewPos(posZp) - getNewPos(currPos))/(delta);
 
 	vec3 normal = normalize(cross(dx, dz));
 
+
 	// distance to center
-	float rand = fract(sin(dot(vec2(Position.x,Position.z) ,vec2(12.9898,78.233))) * 43758.5453);
+	//float rand = fract(sin(dot(vec2(Position.x,Position.z) ,vec2(12.9898,78.233))) * 43758.5453);
 	
 	offset = vec4(0.0, sin(Position.z - 2.0*time)/8.0, 0.0, 1.0);
 	offset += vec4(0.0, cos(Position.x + time)/20, 0.0, 1.0);
 	
+	//if ( normal.z < 0.1)
+	//	offset += vec4(0.0, 3.0, 0.0, 1.0);
+
 	interpolatedNormal = normal;
 	st = TexCoord;
 	pos = Position+vec3(offset);

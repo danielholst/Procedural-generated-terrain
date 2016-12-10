@@ -206,9 +206,37 @@ float snoise(vec3 v, out vec3 gradient)
   return 42.0 * dot(m4, pdotx);
 }
 
+
+vec4 getOffset(vec3 Position) {
+  vec4 offset;
+  vec3 grad;
+  float rand = 1.0*snoise(0.1*Position, grad);
+  grad *= 0.1;
+  rand += 0.25*snoise(2*Position, grad);
+  grad *= 0.5;
+
+  float dist = abs(pow(Position.x, 2) + pow(Position.z+4, 2));
+  vec3 normal = normalize(grad);
+
+  float distWater = Position.z;
+  float water;
+  if (distWater < -3.0 + rand && (-Position.z > Position.x ))
+  {
+    water = -abs(2.0 + distWater)*0.7; // + abs(Position.x)/2.0;
+    offset = vec4(0.0, clamp(water/2.0, -1.0, 0.0) , 0.0, 1.0);
+  }
+  else
+  {
+    offset = vec4(0.0, clamp(-rand*dist/80, 0.0, 6.0), 0.0, 1.0);
+  }
+
+  return offset;
+
+}
+
+
 void main () {
 
-	vec4 offset;
 /*
 	// Displace surface
 	vec3 grad = vec3(0.0); // To store gradient of noise
@@ -238,7 +266,8 @@ void main () {
 */
 	// distance to center
 	//float rand = fract(sin(dot(vec2(Position.x,Position.z) ,vec2(12.9898,78.233))) * 43758.5453);
-	vec3 grad;
+	/*
+  vec3 grad;
 	float rand = 1.0*snoise(0.1*Position, grad);
 	grad *= 0.1;
 	rand += 0.25*snoise(2*Position, grad);
@@ -246,19 +275,6 @@ void main () {
 
 	float dist = abs(pow(Position.x, 2) + pow(Position.z+4, 2));
 	vec3 normal = normalize(grad);
-	/*
-	float distWater = abs(Position.x);
-	float water;
-	if (distWater < 1.7 + rand && abs(Position.z) < 3.0 + rand/10)
-	{
-		water = -abs(-2.2 + distWater)*0.8;
-		offset = vec4(0.0, water , 0.0, 1.0);
-	}
-	else
-	{
-		offset = vec4(0.0, rand*dist/100, 0.0, 1.0);
-	}
-	*/
 
 	float distWater = Position.z;
 	float water;
@@ -271,8 +287,18 @@ void main () {
 	{
 		offset = vec4(0.0, clamp(-rand*dist/80, 0.0, 6.0), 0.0, 1.0);
 	}
+*/
+  float delta = 0.1;
+  vec4 offX = getOffset(Position + vec3(delta, 0.0, 0.0));
+  vec4 offZ = getOffset(Position + vec3(0.0, 0.0, delta));
+  vec4 offset = getOffset(Position);
 
-	interpolatedNormal = normal;
+  vec3 dx = vec3((offX - offset)/(delta));
+  vec3 dz = vec3((offZ - offset)/(delta));
+
+  vec3 normal = normalize(cross(dx,dz));
+	
+  interpolatedNormal = normal;
 	st = TexCoord;
 	pos = Position+vec3(offset);
 	

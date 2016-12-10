@@ -12,8 +12,8 @@ uniform vec3 lightPos;
 uniform vec3 eyePosition;
 
 //vec3 lightPos = vec3(0.0, 4.0, 2.0);
-vec3 LightColor = vec3(0.7,0.7,0.7);
-float LightPower = 5.0;
+vec3 LightColor = vec3(0.9,0.9,0.9);
+float LightPower = 20.0;
 
 
 //out vec4 finalcolor;
@@ -207,9 +207,9 @@ void main () {
 
 	vec4 light = vec4(lightPos, 1);
 	//light = light*rotMat;
-	vec3 colorGreen = vec3(0.2,0.6,0.2);
-	vec3 colorBrown = vec3(0.93, 0.81,0.63); //238;207;161
-	vec3 colorGrey = vec3(0.3, 0.3, 0.3);
+	vec3 colorGreen = vec3(0.1,0.3,0.1);
+	vec3 colorBrown = vec3(0.3, 0.3,0.1); //238;207;161
+	vec3 colorGrey = vec3(0.1, 0.1, 0.1);
 	vec3 addColor = vec3(0);
 
 	// Bump map surface
@@ -249,21 +249,21 @@ void main () {
 	float cosTheta = clamp( dot( n,l ), 0,1 );
 
 	// Eye vector (towards the camera)
-	vec3 E = normalize(pos - eyePosition);
+	vec3 E = normalize(eyePosition-pos);
 	// Direction in which the triangle reflects the light
-	vec3 R = reflect(-l,n);
+	vec3 R = -reflect(l,n);
 	// Cosine of the angle between the Eye vector and the Reflect vector,
 	float cosAlpha = clamp( dot( E,R ), 0,1 );
 
 	if (pos.y < 0)
 		addColor = colorBrown * abs(pos.y);
 	if (pos.y > 0.0)
-		addColor = clamp(colorBrown*(pos.y)/5.0, 0.0, 0.5);
+		addColor = clamp(colorBrown*(pos.y)/8.0, 0.0, 0.5);
 
-	color = MaterialAmbientColor
-	+ MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance)
-	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)/10.0
-	+ addColor;
+	color = pow(MaterialAmbientColor
+	+ MaterialDiffuseColor * LightColor * LightPower * pow(cosTheta,2) / (distance)
+	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)
+	+ addColor, vec3(1/2.2));
 
   
 

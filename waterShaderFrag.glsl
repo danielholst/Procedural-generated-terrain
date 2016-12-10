@@ -1,7 +1,5 @@
 #version 330 core
 
-
-
 in vec3 pos;
 in vec3 interpolatedNormal;
 in vec2 st;
@@ -14,7 +12,7 @@ uniform vec3 eyePosition;
 
 //vec3 lightPos = vec3(0.0, 4.0, 2.0);
 vec3 LightColor = vec3(0.9,0.9,0.9);
-float LightPower = 100.0;
+float LightPower = 4.0;
 
 
 //out vec4 finalcolor;
@@ -209,8 +207,8 @@ void main () {
 	//vec4 light = vec4(1.0, 10.0, 0.0, 0.1);
 	vec4 light = vec4(lightPos, 1);
 	//light = light*rotMat;
-	vec3 colorBlue = vec3(0.0,0.2,0.8);
-	vec3 colorLightBlue = vec3(0.0, 0.5,0.9);
+	vec3 colorBlue = vec3(0.0,0.1,0.3);
+	vec3 colorLightBlue = vec3(0.0, 0.2,0.3);
 	vec3 colorWhite = vec3(0.9, 0.9, 0.9);
 
 	// Bump map surface
@@ -232,11 +230,11 @@ void main () {
 
   // fake shadow
   if( length(pos-ballPos) < 0.3)
-    shadow = vec3(0.9,0.9,0.9);
+    LightPower = 0.9; // = vec3(0.3,0.3,0.3);
 
 	// Material properties
 	vec3 MaterialDiffuseColor = mix(colorBlue, colorLightBlue, 0.5);
-	vec3 MaterialAmbientColor = vec3(0.5,0.5,0.5) * MaterialDiffuseColor;
+	vec3 MaterialAmbientColor = vec3(0.1,0.1,0.1) * MaterialDiffuseColor;
 	vec3 MaterialSpecularColor = vec3(0.9,0.9,0.9);
 	
 	// Distance to the light
@@ -244,22 +242,27 @@ void main () {
 
 	// Normal of the computed fragment, in camera space
 	vec3 n = normalize(norm);
+
+  //if ( n.z < 0.0)
+   // LightPower = 0.1;
+
 	// Direction of the light (from the fragment to the light)
 	vec3 l = normalize(vec3(light)-pos);
 	// Cosine of the angle between the normal and the light direction, 
 	float cosTheta = clamp( dot( n,l ), 0,1 );
+  //if (cosTheta > 0.4)
+   // MaterialAmbientColor = vec3(1.0, 0.0, 0.0);
 
 	// Eye vector (towards the camera)
-	vec3 E = normalize(pos - eyePosition);
+	vec3 E = normalize(eyePosition - pos);
 	// Direction in which the triangle reflects the light
-	vec3 R = reflect(-l,n);
+	vec3 R = -reflect(l,n);
 	// Cosine of the angle between the Eye vector and the Reflect vector,
 	float cosAlpha = clamp( dot( E,R ), 0,1 );
 
-	color = vec4(vec3(MaterialAmbientColor
-  -shadow
-	+ MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance)
-	+ MaterialSpecularColor * 3.0 * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)), 0.4);
+	color = vec4(pow(vec3(MaterialAmbientColor
+	+ MaterialDiffuseColor * LightColor * LightPower * pow(cosTheta,2) / (distance)
+	+ MaterialSpecularColor * LightColor * pow(LightPower,2.2) * pow(cosAlpha,5) / (distance*distance)), vec3(1.0/2.2)), 0.5);
 
 
 	//finalcolor = texture(tex, st) * vec4 (vec3(interpolatedNormal), 1.0);
