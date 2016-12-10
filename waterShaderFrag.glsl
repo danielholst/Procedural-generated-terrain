@@ -12,7 +12,7 @@ uniform vec3 eyePosition;
 
 //vec3 lightPos = vec3(0.0, 4.0, 2.0);
 vec3 LightColor = vec3(0.9,0.9,0.9);
-float LightPower = 4.0;
+float LightPower = 6.0;
 
 
 //out vec4 finalcolor;
@@ -221,15 +221,17 @@ void main () {
 	bump += 0.25 * snoise(pos*10.0, gradtemp);
 	grad += 4.0 * gradtemp; // Same influence (double freq, half amp)
 	
-	// Perturb normal
-	vec3 perturbation = grad - dot(grad, interpolatedNormal) * interpolatedNormal;
-	vec3 norm = interpolatedNormal -  0.2 * perturbation;
+  vec3 no = normalize( cross( dFdx( pos.xyz ), dFdy( pos.xyz )));
+	
+  // Perturb normal
+	vec3 perturbation = grad - dot(grad, no) * no;
+	vec3 norm = no -  0.2 * perturbation;
 
   vec3 ballPos = vec3(0.0, 0.0, -0.4);
   vec3 shadow = vec3(0.0,0.0,0.0);
 
   // fake shadow
-  if( length(pos-ballPos) < 0.3)
+  if( length(pos.xyz-ballPos) < 0.3)
     LightPower = 0.9; // = vec3(0.3,0.3,0.3);
 
 	// Material properties
@@ -241,17 +243,12 @@ void main () {
 	float distance = length(vec3(light) - pos);
 
 	// Normal of the computed fragment, in camera space
-	vec3 n = normalize(norm);
-
-  //if ( n.z < 0.0)
-   // LightPower = 0.1;
+	vec3 n = normalize(norm);// * vec3(1.0, 4.0, 1.0));
 
 	// Direction of the light (from the fragment to the light)
 	vec3 l = normalize(vec3(light)-pos);
 	// Cosine of the angle between the normal and the light direction, 
 	float cosTheta = clamp( dot( n,l ), 0,1 );
-  //if (cosTheta > 0.4)
-   // MaterialAmbientColor = vec3(1.0, 0.0, 0.0);
 
 	// Eye vector (towards the camera)
 	vec3 E = normalize(eyePosition - pos);
@@ -262,7 +259,7 @@ void main () {
 
 	color = vec4(pow(vec3(MaterialAmbientColor
 	+ MaterialDiffuseColor * LightColor * LightPower * pow(cosTheta,2) / (distance)
-	+ MaterialSpecularColor * LightColor * pow(LightPower,2.2) * pow(cosAlpha,5) / (distance*distance)), vec3(1.0/2.2)), 0.5);
+	+ MaterialSpecularColor * LightColor * pow(LightPower,1.5) * pow(cosAlpha,5) / (distance*distance)), vec3(1.0/2.2)), 0.5);
 
 
 	//finalcolor = texture(tex, st) * vec4 (vec3(interpolatedNormal), 1.0);

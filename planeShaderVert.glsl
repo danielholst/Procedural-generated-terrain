@@ -207,20 +207,21 @@ float snoise(vec3 v, out vec3 gradient)
 }
 
 
-vec4 getOffset(vec3 Position) {
+vec4 getOffset(vec3 P) {
   vec4 offset;
   vec3 grad;
-  float rand = 1.0*snoise(0.1*Position, grad);
+
+  float rand = 1.0*snoise(0.1*P, grad);
   grad *= 0.1;
-  rand += 0.25*snoise(2*Position, grad);
+  rand += 0.25*snoise(2.0*P, grad);
   grad *= 0.5;
 
-  float dist = abs(pow(Position.x, 2) + pow(Position.z+4, 2));
+  float dist = abs(pow(P.x, 2.0) + pow(P.z+8.0, 2.0));
   vec3 normal = normalize(grad);
 
-  float distWater = Position.z;
+  float distWater = P.z;
   float water;
-  if (distWater < -3.0 + rand && (-Position.z > Position.x ))
+  if (distWater < -3.0 + rand )
   {
     water = -abs(2.0 + distWater)*0.7; // + abs(Position.x)/2.0;
     offset = vec4(0.0, clamp(water/2.0, -1.0, 0.0) , 0.0, 1.0);
@@ -288,16 +289,21 @@ void main () {
 		offset = vec4(0.0, clamp(-rand*dist/80, 0.0, 6.0), 0.0, 1.0);
 	}
 */
-  float delta = 0.1;
+
+  float delta = 0.01;
   vec4 offX = getOffset(Position + vec3(delta, 0.0, 0.0));
   vec4 offZ = getOffset(Position + vec3(0.0, 0.0, delta));
   vec4 offset = getOffset(Position);
 
-  vec3 dx = vec3((offX - offset)/(delta));
-  vec3 dz = vec3((offZ - offset)/(delta));
+  vec3 dx = normalize(vec3((Position + vec3(delta, 0.0, 0.0) + vec3(offX)) - (Position + vec3(offset))));
+  vec3 dz = normalize(vec3((Position + vec3(0.0, 0.0, delta) + vec3(offZ)) - (Position + vec3(offset))));
 
-  vec3 normal = normalize(cross(dx,dz));
-	
+  vec3 normal = normalize(cross(dx, dz));
+
+  //if ( (offX.z-offset.z) < 0.1)
+   // offset += vec4(0.0, 10.0, 0.0, 0.0);
+
+	//normal = vec3(cross(dx,dz));
   interpolatedNormal = normal;
 	st = TexCoord;
 	pos = Position+vec3(offset);

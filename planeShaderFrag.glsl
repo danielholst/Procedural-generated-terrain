@@ -13,7 +13,7 @@ uniform vec3 eyePosition;
 
 //vec3 lightPos = vec3(0.0, 4.0, 2.0);
 vec3 LightColor = vec3(0.9,0.9,0.9);
-float LightPower = 20.0;
+float LightPower = 2.0;
 
 
 //out vec4 finalcolor;
@@ -229,7 +229,7 @@ void main () {
   
 	// Perturb normal
 	vec3 perturbation = grad - dot(grad, interpolatedNormal) * interpolatedNormal;
-	vec3 norm = interpolatedNormal -  0.2 * perturbation;
+	vec3 norm = interpolatedNormal -  0.02 * perturbation;
 
 
 
@@ -261,8 +261,8 @@ void main () {
 		addColor = clamp(colorBrown*(pos.y)/8.0, 0.0, 0.5);
 
 	color = pow(MaterialAmbientColor
-	+ MaterialDiffuseColor * LightColor * LightPower * pow(cosTheta,2) / (distance)
-	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)
+	+ MaterialDiffuseColor * LightColor * 3.0 *LightPower * pow(cosTheta,2) / (distance)
+	//+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)
 	+ addColor, vec3(1/2.2));
 
   
