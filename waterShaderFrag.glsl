@@ -206,8 +206,8 @@ float snoise(vec3 v, out vec3 gradient)
 // main
 void main () {
 
-	vec4 light = vec4(1.0, 10.0, 0.0, 0.1);
-	//vec4 light = vec4(lightPos, 1);
+	//vec4 light = vec4(1.0, 10.0, 0.0, 0.1);
+	vec4 light = vec4(lightPos, 1);
 	//light = light*rotMat;
 	vec3 colorBlue = vec3(0.0,0.2,0.8);
 	vec3 colorLightBlue = vec3(0.0, 0.5,0.9);
@@ -227,6 +227,12 @@ void main () {
 	vec3 perturbation = grad - dot(grad, interpolatedNormal) * interpolatedNormal;
 	vec3 norm = interpolatedNormal -  0.2 * perturbation;
 
+  vec3 ballPos = vec3(0.0, 0.0, -0.4);
+  vec3 shadow = vec3(0.0,0.0,0.0);
+
+  // fake shadow
+  if( length(pos-ballPos) < 0.3)
+    shadow = vec3(0.9,0.9,0.9);
 
 	// Material properties
 	vec3 MaterialDiffuseColor = mix(colorBlue, colorLightBlue, 0.5);
@@ -251,10 +257,9 @@ void main () {
 	float cosAlpha = clamp( dot( E,R ), 0,1 );
 
 	color = vec4(vec3(MaterialAmbientColor
-	//+ vec3(0.2, 0.2, 0.2)
-	//+ colorWhite * pos.y/2.0
+  -shadow
 	+ MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance)
-	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)), 0.5);
+	+ MaterialSpecularColor * 3.0 * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)), 0.4);
 
 
 	//finalcolor = texture(tex, st) * vec4 (vec3(interpolatedNormal), 1.0);

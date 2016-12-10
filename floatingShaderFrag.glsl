@@ -21,17 +21,16 @@ void main()
 
 	vec4 light = vec4(lightPos, 1);
 
-
 	// Material properties
 	vec3 MaterialDiffuseColor = vec3(mat);
 	vec3 MaterialAmbientColor = vec3(0.5, 0.5, 0.5) * MaterialDiffuseColor;
 	vec3 MaterialSpecularColor = vec3(0.9, 0.9, 0.9) * MaterialDiffuseColor;
-	
+
 	// Distance to the light
 	float distance = length(vec3(light) - pos);
 
 	// Normal of the computed fragment, in camera space
-	vec3 n = normalize(interpolatedNormal);
+	vec3 n = normalize(-interpolatedNormal);
 	// Direction of the light (from the fragment to the light)
 	vec3 l = normalize(pos-vec3(light));
 	// Cosine of the angle between the normal and the light direction, 

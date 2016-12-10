@@ -25,19 +25,6 @@ vec3 getNewPos(vec2 pos)
 void main () {
 
 	vec4 offset;
-/*
-	// Displace surface
-	vec3 grad = vec3(0.0); // To store gradient of noise
-	float bump = snoise(coord*2.0 + vec3(0.2, 0.13, 0.33)*time, grad);
-	grad *= 2.0; // Scale gradient with inner derivative
-    f.texCoord3 = coord; // Undisplaced, untransformed position
-	coord += displaceamount * bump * f.normal;
-	*/
-    //f.texCoord3 = coord; // Displaced but untransformed position
-
-    //vec3 eyeDirection = normalize(eyePosition - Position);
-  	//vec3 lightDirection = normalize(lightPos - Position);
-
 
   	// to recalculate normals, check neighbors in x and z and get dx, dy.
   	// then N^ =  normalize(N0 - g -(g dot N0)N0)
@@ -55,8 +42,8 @@ void main () {
 	float rand = fract(sin(dot(vec2(Position.x,Position.z) ,vec2(12.9898,78.233))) * 43758.5453);
 	
 	offset = vec4(0.0, sin(Position.z - 2.0*time)/8.0, 0.0, 1.0);
-	//offset += vec4(0.0, sin(rand*time)/30, 0.0, 0.0);
 	offset += vec4(0.0, cos(Position.x + time)/20, 0.0, 1.0);
+	
 	interpolatedNormal = normal;
 	st = TexCoord;
 	pos = Position+vec3(offset);

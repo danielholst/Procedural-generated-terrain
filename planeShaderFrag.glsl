@@ -265,6 +265,8 @@ void main () {
 	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)/10.0
 	+ addColor;
 
+  
+
 
 	//finalcolor = texture(tex, st) * vec4 (vec3(interpolatedNormal), 1.0);
 }

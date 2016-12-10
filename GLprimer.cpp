@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
     floating.createSphere(0.2, 20);
 
     // define light position
-    float lightPos[3] = {-2.0, 5.0, 11.0};
+    float lightPos[3] = {-2.0, 5.0, 13.5};
 
     //camera
     Camera camera(glm::perspective(glm::radians(45.0f),
@@ -264,8 +264,8 @@ int main(int argc, char *argv[]) {
         glUniform1f(location_time1 , time); 
         glUniform3fv(eye_pos3, 1, glm::value_ptr(camera.getPos()));
         glUniformMatrix4fv(location_rotMat3, 1, GL_FALSE, &rotMat[0][0]);
+        
         water.render();
-
         glUseProgram(0);
 
         // draw floating sphere
@@ -275,6 +275,7 @@ int main(int argc, char *argv[]) {
         glUniform3fv(light_pos5, 1, lightPos);
         glUniform1f(location_time3 , time); 
         glUniform3fv(eye_pos5, 1, glm::value_ptr(camera.getPos()));
+        
         floating.render();
         glUseProgram(0);
 
@@ -285,7 +286,7 @@ int main(int argc, char *argv[]) {
         glUniform3fv(light_pos4, 1, lightPos);
         glUniform1f(location_time2 , time); 
         glUniform3fv(eye_pos4, 1, glm::value_ptr(camera.getPos()));
-        //glUniformMatrix4fv(location_rotMat4, 1, GL_FALSE, &rotMat[0][0]);
+
         clouds.render();
         glUseProgram(0);
         
