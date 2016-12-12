@@ -12,7 +12,7 @@ uniform vec3 eyePosition;
 
 //vec3 lightPos = vec3(0.0, 4.0, 2.0);
 vec3 LightColor = vec3(0.9,0.9,0.9);
-float LightPower = 6.0;
+float LightPower = 2.0;
 
 
 //out vec4 finalcolor;
@@ -207,8 +207,8 @@ void main () {
 	//vec4 light = vec4(1.0, 10.0, 0.0, 0.1);
 	vec4 light = vec4(lightPos, 1);
 	//light = light*rotMat;
-	vec3 colorBlue = vec3(0.0,0.1,0.3);
-	vec3 colorLightBlue = vec3(0.0, 0.2,0.3);
+	vec3 colorBlue = vec3(0.0,0.1,0.2);
+	vec3 colorLightBlue = vec3(0.0, 0.04, 0.2);
 	vec3 colorWhite = vec3(0.9, 0.9, 0.9);
 
 	// Bump map surface
@@ -221,18 +221,17 @@ void main () {
 	bump += 0.25 * snoise(pos*10.0, gradtemp);
 	grad += 4.0 * gradtemp; // Same influence (double freq, half amp)
 	
-  vec3 no = normalize( cross( dFdx( pos.xyz ), dFdy( pos.xyz )));
-	
   // Perturb normal
-	vec3 perturbation = grad - dot(grad, no) * no;
-	vec3 norm = no -  0.2 * perturbation;
+	vec3 perturbation = grad - dot(grad, interpolatedNormal) * interpolatedNormal;
+	vec3 norm = interpolatedNormal -  0.1 * perturbation;
 
-  vec3 ballPos = vec3(0.0, 0.0, -0.4);
+  vec3 ballPos = vec3(0.0, 0.0, -0.1);
+  ballPos += vec3(0.0, sin(ballPos.z - 2.0*time)/12.0 + cos(ballPos.x + time)/20, 0.0);
   vec3 shadow = vec3(0.0,0.0,0.0);
 
   // fake shadow
-  if( length(pos.xyz-ballPos) < 0.3)
-    LightPower = 0.9; // = vec3(0.3,0.3,0.3);
+  if( length(pos.xyz-ballPos) < 0.1)
+    LightPower = 0.2; // = vec3(0.3,0.3,0.3);
 
 	// Material properties
 	vec3 MaterialDiffuseColor = mix(colorBlue, colorLightBlue, 0.5);
@@ -258,8 +257,8 @@ void main () {
 	float cosAlpha = clamp( dot( E,R ), 0,1 );
 
 	color = vec4(pow(vec3(MaterialAmbientColor
-	+ MaterialDiffuseColor * LightColor * LightPower * pow(cosTheta,2) / (distance)
-	+ MaterialSpecularColor * LightColor * pow(LightPower,1.5) * pow(cosAlpha,5) / (distance*distance)), vec3(1.0/2.2)), 0.5);
+	+ MaterialDiffuseColor * LightColor * LightPower * pow(cosTheta,2) / (distance*0.5)
+	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,2.0) / (distance*distance*0.2)), vec3(1.0/2.2)), 0.4);
 
 
 	//finalcolor = texture(tex, st) * vec4 (vec3(interpolatedNormal), 1.0);

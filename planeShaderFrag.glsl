@@ -13,7 +13,7 @@ uniform vec3 eyePosition;
 
 //vec3 lightPos = vec3(0.0, 4.0, 2.0);
 vec3 LightColor = vec3(0.9,0.9,0.9);
-float LightPower = 2.0;
+float LightPower = 3.0;
 
 
 //out vec4 finalcolor;
@@ -207,8 +207,8 @@ void main () {
 
 	vec4 light = vec4(lightPos, 1);
 	//light = light*rotMat;
-	vec3 colorGreen = vec3(0.1,0.3,0.1);
-	vec3 colorBrown = vec3(0.3, 0.3,0.1); //238;207;161
+	vec3 colorGreen = vec3(0.1,0.25,0.1);
+	vec3 colorBrown = vec3(0.2, 0.2,0.1); //238;207;161
 	vec3 colorGrey = vec3(0.1, 0.1, 0.1);
 	vec3 addColor = vec3(0);
 
@@ -223,8 +223,8 @@ void main () {
   {
     bump += 0.5 * snoise(pos*20.0, gradtemp);
     grad += 10.0 * gradtemp; // Same influence (double freq, half amp)
-    bump += 0.25 * snoise(pos*40.0, gradtemp);
-	  grad += 10.0 * gradtemp; // Same influence (double freq, half amp)
+    //bump += 0.25 * snoise(pos*40.0, gradtemp);
+	  //grad += 10.0 * gradtemp; // Same influence (double freq, half amp)
 	}
   
 	// Perturb normal

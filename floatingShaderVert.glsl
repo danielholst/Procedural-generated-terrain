@@ -15,10 +15,10 @@ out vec3 pos;
 
 void main()
 {
-	float waveAltitude = sin(-2.0*time);
+	float waveAltitude = sin(-2.0*time)/12.0 + cos(time)/20.0;
 	interpolatedNormal = Normal;
 	st = TexCoord;
-	pos = Position + vec3(0.0, waveAltitude/20-0.04, 0.0);
+	pos = Position + vec3(0.0, waveAltitude-0.12, 0.0);
 	
 	gl_Position =  MVP * (vec4 (pos, 1.0));
 }

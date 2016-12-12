@@ -224,7 +224,7 @@ vec4 getOffset(vec3 P) {
   if (distWater < -3.0 + rand )
   {
     water = -abs(2.0 + distWater)*0.7; // + abs(Position.x)/2.0;
-    offset = vec4(0.0, clamp(water/2.0, -1.0, 0.0) , 0.0, 1.0);
+    offset = vec4(0.0, clamp(water/2.0, -3.5, 0.0) , 0.0, 1.0);
   }
   else
   {
