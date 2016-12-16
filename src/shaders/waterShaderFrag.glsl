@@ -12,7 +12,7 @@ uniform vec3 eyePosition;
 
 //vec3 lightPos = vec3(0.0, 4.0, 2.0);
 vec3 LightColor = vec3(0.9,0.9,0.9);
-float LightPower = 1.5;
+float LightPower = 1.0;
 
 
 //out vec4 finalcolor;
@@ -231,23 +231,22 @@ void main () {
 
   // fake shadow
   if( length(pos.xyz-ballPos) < 0.1)
-    LightPower = 0.2; // = vec3(0.3,0.3,0.3);
+    LightPower = 0.2;
 
 	// Material properties
 	vec3 MaterialDiffuseColor = mix(colorBlue, colorLightBlue, 0.5);
 	vec3 MaterialAmbientColor = vec3(0.3,0.3,0.3) * MaterialDiffuseColor;
-	vec3 MaterialSpecularColor = vec3(1.0,1.0,1.0); //vec3(0.9,0.9,0.9);
+	vec3 MaterialSpecularColor =  vec3(0.9,0.9,0.9);
 	
 	// Distance to the light
 	float distance = length(vec3(light) - pos);
 
 	// Normal of the computed fragment, in camera space
-	vec3 n = normalize(norm); // * vec3(1.0, 4.0, 1.0));
-
-  //vec3 n = vec3(0.0, 1.0, 0.0);
+	vec3 n = normalize(norm);
 
 	// Direction of the light (from the fragment to the light)
 	vec3 l = normalize(vec3(light)-pos);
+
 	// Cosine of the angle between the normal and the light direction, 
 	float cosTheta = clamp( dot( n,l ), 0,1 );
 
@@ -255,19 +254,11 @@ void main () {
 	vec3 E = normalize(eyePosition - pos);
 	// Direction in which the triangle reflects the light
 	vec3 R = -reflect(l,n);
-	
-  //vec3 R = 2*vec3(0.0,1.0,0.0) * dot(vec3(0.0,1.0,0.0), l) - l;
 
   // Cosine of the angle between the Eye vector and the Reflect vector,
 	float cosAlpha = clamp( dot( E,R ), 0,1 );
 
-  //if (cosAlpha < 0.9)
-   // MaterialAmbientColor = vec3(1.0, 0.0, 0.0);
-
 	color = vec4(pow(vec3(MaterialAmbientColor
 	+ MaterialDiffuseColor * LightColor * LightPower * pow(cosTheta,2) / (distance*0.1)
-	+ MaterialSpecularColor * LightColor * LightPower/2.0 * pow(cosAlpha,80.0) / (distance*0.1) ), vec3(1.0/2.2)), 0.6);
-
-
-	//finalcolor = texture(tex, st) * vec4 (vec3(interpolatedNormal), 1.0);
+	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,100.0) / (distance*0.1) ), vec3(1.0/2.2)), 0.5);
 }

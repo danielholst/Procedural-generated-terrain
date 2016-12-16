@@ -236,17 +236,6 @@ void main () {
 	// Cosine of the angle between the Eye vector and the Reflect vector,
 	float cosAlpha = clamp( dot( E,R ), 0,1 );
 
-/*
-	// create rainbow
-	if ( pos.z > 10.0 && pos.z < 10.2)
-		rainbow = vec3(1.0 , 0.0, 0.0);
-	if ( pos.z > 10.2 && pos.z < 10.4)
-		rainbow = vec3(1.0, 1.0, 0.0);
-	if ( pos.z > 10.4 && pos.z < 10.6)
-		rainbow = vec3(0.0, 1.0, 1.0);
-	if ( pos.z > 10.6 && pos.z < 10.8)
-		rainbow = vec3(0.0, 0.0, 1.0);
-*/
 	color = vec4(MaterialAmbientColor
 	+ rainbow
 	+ MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance)

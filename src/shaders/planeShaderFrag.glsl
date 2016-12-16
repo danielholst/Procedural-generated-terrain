@@ -1,7 +1,5 @@
 #version 330 core
 
-//uniform float time;
-
 in vec3 pos;
 in vec3 interpolatedNormal;
 in vec2 st;
@@ -11,14 +9,10 @@ uniform mat4 rotMat;
 uniform vec3 lightPos;
 uniform vec3 eyePosition;
 
-//vec3 lightPos = vec3(0.0, 4.0, 2.0);
 vec3 LightColor = vec3(0.9,0.9,0.9);
 float LightPower = 3.0;
 
-
-//out vec4 finalcolor;
 out vec3 color;
-
 
 // Authors : Ian McEwan, Ashima Arts and Stefan Gustavson, LiU.
 // noise functions
@@ -206,7 +200,6 @@ float snoise(vec3 v, out vec3 gradient)
 void main () {
 
 	vec4 light = vec4(lightPos, 1);
-	//light = light*rotMat;
 	vec3 colorGreen = vec3(0.1,0.25,0.1);
 	vec3 colorBrown = vec3(0.2, 0.2,0.1); //238;207;161
 	vec3 colorGrey = vec3(0.1, 0.1, 0.1);
@@ -266,9 +259,4 @@ void main () {
 	+ MaterialDiffuseColor * LightColor * 2.0 * LightPower * pow(cosTheta,2) / (distance)
 	//+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)
 	+ addColor, vec3(1/2.2));
-
-  
-
-
-	//finalcolor = texture(tex, st) * vec4 (vec3(interpolatedNormal), 1.0);
 }
