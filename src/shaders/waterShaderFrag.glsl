@@ -254,9 +254,9 @@ void main () {
 	// Eye vector (towards the camera)
 	vec3 E = normalize(eyePosition - pos);
 	// Direction in which the triangle reflects the light
-	//vec3 R = -reflect(l,n);
+	vec3 R = -reflect(l,n);
 	
-  vec3 R = 2*vec3(0.0,1.0,0.0) * dot(vec3(0.0,1.0,0.0), l) - l;
+  //vec3 R = 2*vec3(0.0,1.0,0.0) * dot(vec3(0.0,1.0,0.0), l) - l;
 
   // Cosine of the angle between the Eye vector and the Reflect vector,
 	float cosAlpha = clamp( dot( E,R ), 0,1 );
@@ -266,7 +266,7 @@ void main () {
 
 	color = vec4(pow(vec3(MaterialAmbientColor
 	+ MaterialDiffuseColor * LightColor * LightPower * pow(cosTheta,2) / (distance*0.1)
-	+ MaterialSpecularColor * LightColor * LightPower/2.0 * pow(cosAlpha,80.0) / (distance*distance*0.01) ), vec3(1.0/2.2)), 0.6);
+	+ MaterialSpecularColor * LightColor * LightPower/2.0 * pow(cosAlpha,80.0) / (distance*0.1) ), vec3(1.0/2.2)), 0.6);
 
 
 	//finalcolor = texture(tex, st) * vec4 (vec3(interpolatedNormal), 1.0);
