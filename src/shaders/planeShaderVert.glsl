@@ -1,23 +1,28 @@
 #version 330 core
 
-in vec3 pos;
-in vec3 interpolatedNormal;
-in vec2 st;
+layout(location = 0) in vec3 Position;
+layout ( location =1) in vec3 Normal;
+layout ( location =2) in vec2 TexCoord;
 
-uniform float time;
-uniform sampler2D tex;
-uniform mat4 rotMat;
+uniform mat4 MVP;
 uniform vec3 lightPos;
 uniform vec3 eyePosition;
 
-//vec3 lightPos = vec3(0.0, 4.0, 2.0);
-vec3 LightColor = vec3(0.9,0.9,0.9);
-float LightPower = 2.0;
+out vec3 interpolatedNormal;
+out vec2 st;
+out vec3 pos;
 
+float delta = 0.3;
 
-//out vec4 finalcolor;
-out vec4 color;
+vec3 getNewPos(vec2 pos)
+{
+	// distance to center
+	float rand = fract(sin(dot(pos ,vec2(12.9898,78.233))) * 43758.5453);
+	float dist = abs(pow(pos.x, 2) + pow(pos.y, 2));
 
+	vec3 newPos = vec3(pos.x, rand*dist/10, pos.y);
+	return newPos;
+}
 
 // Authors : Ian McEwan, Ashima Arts and Stefan Gustavson, LiU.
 // noise functions
@@ -201,65 +206,117 @@ float snoise(vec3 v, out vec3 gradient)
   return 42.0 * dot(m4, pdotx);
 }
 
-// main
+
+vec4 getOffset(vec3 P) {
+  vec4 offset;
+  vec3 grad;
+
+  float rand = 0.5*snoise(0.1*P, grad);
+  grad *= 0.05;
+  rand += 0.25*snoise(2.0*P, grad);
+  grad *= 0.5;
+
+  float dist = abs(pow(P.x, 2.0) + pow(P.z, 2.0));
+  vec3 normal = normalize(grad);
+/*
+  float distWater = P.z;
+  float water;
+  if (distWater < -3.0 + rand )
+  {
+    water = -abs(2.0 + distWater)*0.7; // + abs(Position.x)/2.0;
+    offset = vec4(0.0, clamp(water/2.0, -3.5, 0.0) , 0.0, 1.0);
+  }
+  */
+  //else
+ // {
+  if (dist > 5.0)
+  {
+    offset = vec4(0.0, clamp((dist-5.0)/20, -2.0, 0.0), 0.0, 1.0);
+
+  }
+  else
+  {
+    offset = vec4(0.0, clamp(-dist*3.0, -2.0, 3.0), 0.0, 1.0);
+  }
+  
+  //}
+
+  return offset;
+
+}
+
+
 void main () {
 
-	//vec4 light = vec4(1.0, 10.0, 0.0, 0.1);
-	vec4 light = vec4(lightPos, 1);
-	//light = light*rotMat;
-	vec3 colorBlue = vec3(0.0,0.1,0.2);
-	vec3 colorLightBlue = vec3(0.0, 0.04, 0.2);
-	vec3 colorWhite = vec3(0.9, 0.9, 0.9);
-
-	// Bump map surface
+/*
+	// Displace surface
 	vec3 grad = vec3(0.0); // To store gradient of noise
-	vec3 gradtemp = vec3(0.0); // Temporary gradient for fractal sum
-	float bump = 0.2 * snoise(2*pos, grad) + 0.5;
-	grad *= 0.4; // Scale gradient with inner derivative
-	bump += 0.5 * snoise(pos*4.0, gradtemp);
-	grad += 2.0 * gradtemp; // Same influence (double freq, half amp)
-	bump += 0.25 * snoise(pos*10.0, gradtemp);
-	grad += 4.0 * gradtemp; // Same influence (double freq, half amp)
+	float bump = snoise(coord*2.0 + vec3(0.2, 0.13, 0.33)*time, grad);
+	grad *= 2.0; // Scale gradient with inner derivative
+    f.texCoord3 = coord; // Undisplaced, untransformed position
+	coord += displaceamount * bump * f.normal;
+	*/
+    //f.texCoord3 = coord; // Displaced but untransformed position
+
+    //vec3 eyeDirection = normalize(eyePosition - Position);
+  	//vec3 lightDirection = normalize(lightPos - Position);
+
+
+  	// to recalculate normals, check neighbors in x and z and get dx, dy.
+  	// then N^ =  normalize(N0 - g -(g dot N0)N0)
+	/*
+	vec2 posXp = vec2(Position.x + delta, Position.z);
+	vec2 posXm = vec2(Position.x - delta, Position.z);
+	vec2 posZp = vec2(Position.x, Position.z + delta);
+	vec2 posZm = vec2(Position.x, Position.z - delta);
+
+	vec3 dx = (getNewPos(posXp) - getNewPos(posXm))/(2*delta);
+	vec3 dz = (getNewPos(posZp) - getNewPos(posZm))/(2*delta);
+
+	vec3 normal = normalize(cross(dx, dz));
+*/
+	// distance to center
+	//float rand = fract(sin(dot(vec2(Position.x,Position.z) ,vec2(12.9898,78.233))) * 43758.5453);
+	/*
+  vec3 grad;
+	float rand = 1.0*snoise(0.1*Position, grad);
+	grad *= 0.1;
+	rand += 0.25*snoise(2*Position, grad);
+	grad *= 0.5;
+
+	float dist = abs(pow(Position.x, 2) + pow(Position.z+4, 2));
+	vec3 normal = normalize(grad);
+
+	float distWater = Position.z;
+	float water;
+	if (distWater < -3.0 + rand && (-Position.z > Position.x ))
+	{
+		water = -abs(2.0 + distWater)*0.7; // + abs(Position.x)/2.0;
+		offset = vec4(0.0, clamp(water/2.0, -1.0, 0.0) , 0.0, 1.0);
+	}
+	else
+	{
+		offset = vec4(0.0, clamp(-rand*dist/80, 0.0, 6.0), 0.0, 1.0);
+	}
+*/
+
+  float delta = 0.01;
+  vec4 offX = getOffset(Position + vec3(delta, 0.0, 0.0));
+  vec4 offZ = getOffset(Position + vec3(0.0, 0.0, delta));
+  vec4 offset = getOffset(Position);
+
+  vec3 dx = normalize(vec3((Position + vec3(delta, 0.0, 0.0) + vec3(offX)) - (Position + vec3(offset))));
+  vec3 dz = normalize(vec3((Position + vec3(0.0, 0.0, delta) + vec3(offZ)) - (Position + vec3(offset))));
+
+  vec3 normal = normalize(cross(dx, dz));
+
+  //if ( (offX.z-offset.z) < 0.1)
+   // offset += vec4(0.0, 10.0, 0.0, 0.0);
+
+	//normal = vec3(cross(dx,dz));
+  interpolatedNormal = normal;
+	st = TexCoord;
+	pos = Position+vec3(offset);
 	
-  // Perturb normal
-	vec3 perturbation = grad - dot(grad, interpolatedNormal) * interpolatedNormal;
-	vec3 norm = interpolatedNormal -  0.1 * perturbation;
-
-  vec3 ballPos = vec3(0.0, 0.0, -0.1);
-  ballPos += vec3(0.0, sin(ballPos.z - 2.0*time)/12.0 + cos(ballPos.x + time)/20, 0.0);
-  vec3 shadow = vec3(0.0,0.0,0.0);
-
-  // fake shadow
-  if( length(pos.xyz-ballPos) < 0.1)
-    LightPower = 0.2; // = vec3(0.3,0.3,0.3);
-
-	// Material properties
-	vec3 MaterialDiffuseColor = mix(colorBlue, colorLightBlue, 0.5);
-	vec3 MaterialAmbientColor = vec3(0.1,0.1,0.1) * MaterialDiffuseColor;
-	vec3 MaterialSpecularColor = vec3(0.9,0.9,0.9);
-	
-	// Distance to the light
-	float distance = length(vec3(light) - pos);
-
-	// Normal of the computed fragment, in camera space
-	vec3 n = normalize(norm);// * vec3(1.0, 4.0, 1.0));
-
-	// Direction of the light (from the fragment to the light)
-	vec3 l = normalize(vec3(light)-pos);
-	// Cosine of the angle between the normal and the light direction, 
-	float cosTheta = clamp( dot( n,l ), 0,1 );
-
-	// Eye vector (towards the camera)
-	vec3 E = normalize(eyePosition - pos);
-	// Direction in which the triangle reflects the light
-	vec3 R = -reflect(l,n);
-	// Cosine of the angle between the Eye vector and the Reflect vector,
-	float cosAlpha = clamp( dot( E,R ), 0,1 );
-
-	color = vec4(pow(vec3(MaterialAmbientColor
-	+ MaterialDiffuseColor * LightColor * LightPower * pow(cosTheta,2) / (distance*0.5)
-	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,2.0) / (distance*distance*0.2)), vec3(1.0/2.2)), 0.4);
-
-
-	//finalcolor = texture(tex, st) * vec4 (vec3(interpolatedNormal), 1.0);
+	gl_Position =  MVP * (vec4 (Position, 1.0) + offset);
 }

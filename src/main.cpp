@@ -1,14 +1,14 @@
 // File and console I/O for logging and error reporting
 #include <iostream>
-#include "TriangleSoup.hpp"
-#include "Utilities.hpp"
-#include "Shader.hpp"
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtx/transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
-#include "camera.hpp"
-#include "noise1234.hpp"
+#include "common/TriangleSoup.hpp"
+#include "common/Utilities.hpp"
+#include "common/Shader.hpp"
+#include "common/glm/glm.hpp"
+#include "common/glm/gtc/matrix_transform.hpp"
+#include "common/glm/gtx/transform.hpp"
+#include "common/glm/gtc/type_ptr.hpp"
+#include "common/camera.hpp"
+
 
 // In MacOS X, tell GLFW to include the modern OpenGL headers.
 // Windows does not want this, so we make this Mac-only.
@@ -103,16 +103,16 @@ int main(int argc, char *argv[]) {
     glfwMakeContextCurrent(window);
 
     // create shaders
-    sphereShader.createShader("sphereShaderVert.glsl", "sphereShaderFrag.glsl");
-    planeShader.createShader("planeShaderVert.glsl", "planeShaderFrag.glsl");
-    waterShader.createShader("waterShaderVert.glsl", "waterShaderFrag.glsl");
-    cloudShader.createShader("cloudShaderVert.glsl", "cloudShaderFrag.glsl");
-    floatingShader.createShader("floatingShaderVert.glsl", "floatingShaderFrag.glsl");
+    sphereShader.createShader("shaders/sphereShaderVert.glsl", "shaders/sphereShaderFrag.glsl");
+    planeShader.createShader("shaders/planeShaderVert.glsl", "shaders/planeShaderFrag.glsl");
+    waterShader.createShader("shaders/waterShaderVert.glsl", "shaders/waterShaderFrag.glsl");
+    cloudShader.createShader("shaders/cloudShaderVert.glsl", "shaders/cloudShaderFrag.glsl");
+    floatingShader.createShader("shaders/floatingShaderVert.glsl", "shaders/floatingShaderFrag.glsl");
 
     // load objects
     sphere.createSphere(15, 40);
-    terrain.readOBJ("plane2.obj");
-    water.readOBJ("plane2.obj");
+    terrain.readOBJ("objects/plane2.obj");
+    water.readOBJ("objects/plane2.obj");
     clouds.createSphere(14.5, 40);
     floating.createSphere(0.2, 20);
 
@@ -128,12 +128,12 @@ int main(int argc, char *argv[]) {
     glm::mat4 Model = glm::translate(glm::vec3(0, 0.0, 0));
     glm::mat4 sphereMVP;
 
-    glm::mat4 waterTrans = glm::translate(glm::vec3(0, -0.6, -8.0));
-    waterTrans += glm::scale(glm::vec3(3.0, 1.0, 1.5));
+    glm::mat4 waterTrans = glm::translate(glm::vec3(0, -0.6, 0.0));
+    waterTrans += glm::scale(glm::vec3(1.0, 1.0, 1.0));
     glm::mat4 waterMVP;
     
-    glm::mat4 planeTrans = glm::translate(glm::vec3(0, 0, 4.0));
-    planeTrans += glm::scale(glm::vec3(1.5, 1.0, 3.0));
+    glm::mat4 planeTrans = glm::translate(glm::vec3(0, 0, 3.0));
+    planeTrans += glm::scale(glm::vec3(20.0, 1.0, 20.0));
     glm::mat4 planeMVP;
 
     glm::mat4 cloudTrans = glm::translate(glm::vec3(0, 0.0, 0));

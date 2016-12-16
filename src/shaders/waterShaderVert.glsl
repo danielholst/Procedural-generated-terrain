@@ -19,7 +19,7 @@ vec3 getNewPos(vec2 pos)
 {
 
 	vec3 newPos = vec3(pos.x,
-		 		  sin(pos.y - 2.0*time)/8.0 + cos(Position.x + time)/20, 
+		 		  (sin(pos.y - 2.0*time)/8.0)/(length(pos) + cos(Position.x + time)), 
 		 	      pos.y);
 	return newPos;
 }
@@ -27,7 +27,7 @@ vec3 getNewPos(vec2 pos)
 vec4 getOffset(vec3 P) {
   vec4 offset;
   vec3 grad;
-  offset = vec4(0.0, sin(P.z - 2.0*time)/12.0 + cos(P.x + time)/20, 0.0, 0.0);
+  offset = vec4(0.0, sin(P.z - 2.0*time)/15.0 + cos(P.x + time)/25, 0.0, 0.0);
   return offset;
 
 }
@@ -75,7 +75,7 @@ void main () {
   vec3 dx = normalize(vec3(vec3(delta, 0.0, 0.0) + vec3(offX)) - vec3(offset));
   vec3 dz = normalize(vec3(vec3(0.0, 0.0, delta) + vec3(offZ)) + vec3(offset));
 
-  vec3 normal = normalize(cross(dx, dz)*vec3(1.0,3.0, 1.0));
+  vec3 normal = normalize(cross(dx, dz)*vec3(1.0, 2.0, 1.0));
 
   if( normal.y < 0 )
   	normal = vec3(normal.x, -normal.y, normal.z);
