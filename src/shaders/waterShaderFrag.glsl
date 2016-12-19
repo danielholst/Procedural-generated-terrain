@@ -231,7 +231,7 @@ void main () {
 
   // fake shadow
   if( length(pos.xyz-ballPos) < 0.1)
-    LightPower = 0.2;
+    LightPower = 0.1;
 
 	// Material properties
 	vec3 MaterialDiffuseColor = mix(colorBlue, colorLightBlue, 0.5);

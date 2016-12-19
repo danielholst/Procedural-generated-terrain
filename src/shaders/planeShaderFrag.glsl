@@ -10,7 +10,7 @@ uniform vec3 lightPos;
 uniform vec3 eyePosition;
 
 vec3 LightColor = vec3(0.9,0.9,0.9);
-float LightPower = 3.0;
+float LightPower = 2.0;
 
 out vec3 color;
 
@@ -201,7 +201,7 @@ void main () {
 
 	vec4 light = vec4(lightPos, 1);
 	vec3 colorGreen = vec3(0.1,0.25,0.1);
-	vec3 colorBrown = vec3(0.2, 0.2,0.1); //238;207;161
+	vec3 colorBrown = vec3(0.3, 0.2,0.01); //238;207;161
 	vec3 colorGrey = vec3(0.1, 0.1, 0.1);
 	vec3 addColor = vec3(0);
 
@@ -227,8 +227,8 @@ void main () {
 
 
 	// Material properties
-	vec3 MaterialDiffuseColor = mix(colorGreen, colorBrown, 0.5);
-	vec3 MaterialAmbientColor = vec3(0.1,0.1,0.1) * MaterialDiffuseColor;
+	vec3 MaterialDiffuseColor = colorBrown;
+	vec3 MaterialAmbientColor = vec3(0.3,0.3,0.3) * MaterialDiffuseColor;
 	vec3 MaterialSpecularColor = MaterialDiffuseColor;
 	
 	// Distance to the light
@@ -248,15 +248,17 @@ void main () {
 	// Cosine of the angle between the Eye vector and the Reflect vector,
 	float cosAlpha = clamp( dot( E,R ), 0,1 );
 
-	if (pos.y < 0 && pos.y > -3.0)
-		addColor = colorBrown * abs(pos.y);
-  if (pos.y < -3.0)
-    addColor = colorBrown*abs(pos.y) - colorBrown*abs(pos.y - 3.0);
+	//if (pos.y < 0 && pos.y > -3.0)
+	//	addColor = colorBrown * abs(pos.y);
+  //if (pos.y < -3.0)
+  //  addColor = colorBrown*abs(pos.y) - colorBrown*abs(pos.y - 3.0);
+  //if (pos.y < -3.0)
+  //  addColor = - vec3(1.0,1.0,1.0);
 	if (pos.y > 0.0)
 		addColor = clamp(colorBrown*(pos.y)/8.0, 0.0, 0.5);
 
 	color = pow(MaterialAmbientColor
 	+ MaterialDiffuseColor * LightColor * 2.0 * LightPower * pow(cosTheta,2) / (distance)
-	//+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)
+	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)
 	+ addColor, vec3(1/2.2));
 }

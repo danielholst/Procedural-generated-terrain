@@ -15,19 +15,10 @@ out vec3 pos;
 
 float delta = 0.1;
 
-vec3 getNewPos(vec2 pos)
-{
-
-	vec3 newPos = vec3( pos.x,
-		 		  		(sin(pos.y - 2.0*time)/8.0)/(length(pos) + cos(Position.x + time)), 
-		 	      	   	pos.y);
-	return newPos;
-}
-
 vec4 getOffset(vec3 P) {
  	vec4 offset;
     vec3 grad;
-  	offset = vec4(0.0, sin(P.z - 2.0*time)/15.0 + cos(P.x + time)/25, 0.0, 0.0);
+  	offset = vec4(0.0, sin(P.z - 2.0*time)/15.0 + cos(P.x + time)/25.0, 0.0, 0.0);
   	return offset;
 }
 

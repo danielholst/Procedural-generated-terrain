@@ -221,12 +221,12 @@ vec4 getOffset(vec3 P) {
 
   if (dist > 5.0)
   {
-    offset = vec4(0.0, clamp((dist-5.0)/20, -2.0, 0.0), 0.0, 1.0);
+    offset = vec4(0.0, clamp((dist-5.0)/40, -5.0, 0.0), 0.0, 1.0);
 
   }
   else
   {
-    offset = vec4(0.0, clamp(-dist*3.0, -2.0, 3.0), 0.0, 1.0);
+    offset = vec4(0.0, clamp(-dist*3.0, -5.0, 3.0), 0.0, 1.0);
   }
 
   return offset;
