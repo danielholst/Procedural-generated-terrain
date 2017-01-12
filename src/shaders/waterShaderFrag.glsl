@@ -1,19 +1,23 @@
 #version 330 core
 
-uniform float time;
-uniform vec3 lightPos;
-uniform vec3 eyePosition;
-uniform mat4 rotMat;
-uniform mat4 MVP;
-
+in vec3 pos;
 in vec3 interpolatedNormal;
 in vec2 st;
-in vec3 pos;
 
+uniform float time;
+uniform sampler2D tex;
+uniform mat4 rotMat;
+uniform vec3 lightPos;
+uniform vec3 eyePosition;
+
+//vec3 lightPos = vec3(0.0, 4.0, 2.0);
 vec3 LightColor = vec3(0.9,0.9,0.9);
-float LightPower = 10.0;
+float LightPower = 1.0;
 
+
+//out vec4 finalcolor;
 out vec4 color;
+
 
 // Authors : Ian McEwan, Ashima Arts and Stefan Gustavson, LiU.
 // noise functions
@@ -197,58 +201,64 @@ float snoise(vec3 v, out vec3 gradient)
   return 42.0 * dot(m4, pdotx);
 }
 
-
+// main
 void main () {
 
-	vec4 mat = vec4(0.9, 0.9, 0.9, 1.0);// + vec4 (vec3(interpolatedNormal)*vec3(0,0,1), 1.0) ;
-
+	//vec4 light = vec4(1.0, 10.0, 0.0, 0.1);
 	vec4 light = vec4(lightPos, 1);
-	vec3 rainbow = vec3(0);
-	//light =  rotMat * light;
+	//light = light*rotMat;
+	vec3 colorBlue = vec3(0.0,0.1,0.3);
+	vec3 colorLightBlue = vec3(0.0, 0.04, 0.2);
+	vec3 colorWhite = vec3(0.9, 0.9, 0.9);
 
+	// Bump map surface
 	vec3 grad = vec3(0.0); // To store gradient of noise
 	vec3 gradtemp = vec3(0.0); // Temporary gradient for fractal sum
-	float bump =  20 * snoise(2*vec3(pos.x, pos.y*10, pos.z) + 0.4 * abs(sin(time)+1.0), grad) + 0.5;
-	grad *= 40;
-	// Perturb normal
+	float bump = 0.2 * snoise(2*pos, grad) + 0.5;
+	grad *= 0.4; // Scale gradient with inner derivative
+	bump += 0.5 * snoise(pos*4.0, gradtemp);
+	grad += 2.0 * gradtemp; // Same influence (double freq, half amp)
+	bump += 0.25 * snoise(pos*10.0, gradtemp);
+	grad += 4.0 * gradtemp; // Same influence (double freq, half amp)
+	
+  // Perturb normal
 	vec3 perturbation = grad - dot(grad, interpolatedNormal) * interpolatedNormal;
 	vec3 norm = interpolatedNormal -  0.2 * perturbation;
 
+  vec3 ballPos = vec3(0.0, 0.0, -0.1);
+  ballPos += vec3(0.0, sin(ballPos.z - 2.0*time)/15.0 + cos(ballPos.x + time)/25, 0.0);
+  vec3 shadow = vec3(0.0,0.0,0.0);
+
+  // fake shadow
+  if( length(pos.xyz-ballPos) < 0.1)
+    LightPower = 0.1;
+
 	// Material properties
-	vec3 MaterialDiffuseColor = vec3(mat);
-	vec3 MaterialAmbientColor = vec3(0.5, 0.5, 0.5) * MaterialDiffuseColor;
-	vec3 MaterialSpecularColor = vec3(0.9, 0.9, 0.9) * MaterialDiffuseColor;
+	vec3 MaterialDiffuseColor = mix(colorBlue, colorLightBlue, 0.5);
+	vec3 MaterialAmbientColor = vec3(0.3,0.3,0.3) * MaterialDiffuseColor;
+	vec3 MaterialSpecularColor =  vec3(0.9,0.9,0.9);
 	
 	// Distance to the light
 	float distance = length(vec3(light) - pos);
 
 	// Normal of the computed fragment, in camera space
 	vec3 n = normalize(norm);
+
 	// Direction of the light (from the fragment to the light)
-	vec3 l = normalize(pos-vec3(light));
+	vec3 l = normalize(vec3(light)-pos);
+
 	// Cosine of the angle between the normal and the light direction, 
 	float cosTheta = clamp( dot( n,l ), 0,1 );
 
 	// Eye vector (towards the camera)
-	vec3 E = normalize(pos - eyePosition);
+	vec3 E = normalize(eyePosition - pos);
 	// Direction in which the triangle reflects the light
-	vec3 R = reflect(-l,n);
-	// Cosine of the angle between the Eye vector and the Reflect vector,
+	vec3 R = -reflect(l,n);
+
+  // Cosine of the angle between the Eye vector and the Reflect vector,
 	float cosAlpha = clamp( dot( E,R ), 0,1 );
 
-/*
-	// create rainbow
-	if ( pos.z > 10.0 && pos.z < 10.2)
-		rainbow = vec3(1.0 , 0.0, 0.0);
-	if ( pos.z > 10.2 && pos.z < 10.4)
-		rainbow = vec3(1.0, 1.0, 0.0);
-	if ( pos.z > 10.4 && pos.z < 10.6)
-		rainbow = vec3(0.0, 1.0, 1.0);
-	if ( pos.z > 10.6 && pos.z < 10.8)
-		rainbow = vec3(0.0, 0.0, 1.0);
-*/
-	color = vec4(MaterialAmbientColor
-	+ rainbow
-	+ MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance)
-	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance), 0.03);
+	color = vec4(pow(vec3(MaterialAmbientColor
+	+ MaterialDiffuseColor * LightColor * LightPower * pow(cosTheta,2) / (distance*0.1)
+	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,100.0) / (distance*0.1) ), vec3(1.0/2.2)), 0.5);
 }

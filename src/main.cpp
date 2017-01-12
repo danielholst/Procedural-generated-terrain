@@ -1,14 +1,14 @@
 // File and console I/O for logging and error reporting
 #include <iostream>
-#include "TriangleSoup.hpp"
-#include "Utilities.hpp"
-#include "Shader.hpp"
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtx/transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
-#include "camera.hpp"
-#include "noise1234.hpp"
+#include "common/TriangleSoup.hpp"
+#include "common/Utilities.hpp"
+#include "common/Shader.hpp"
+#include "common/glm/glm.hpp"
+#include "common/glm/gtc/matrix_transform.hpp"
+#include "common/glm/gtx/transform.hpp"
+#include "common/glm/gtc/type_ptr.hpp"
+#include "common/camera.hpp"
+
 
 // In MacOS X, tell GLFW to include the modern OpenGL headers.
 // Windows does not want this, so we make this Mac-only.
@@ -35,6 +35,7 @@ int main(int argc, char *argv[]) {
     Shader waterShader;
     Shader cloudShader;
     Shader floatingShader;
+    Shader treeShader;
 
     // ID
     GLuint sphereID;
@@ -42,6 +43,7 @@ int main(int argc, char *argv[]) {
     GLuint waterID;
     GLuint cloudID;
     GLuint floatingID;
+    GLuint treeID;
     GLint location_time1;
     GLint location_time2;
     GLint location_time3;
@@ -49,16 +51,19 @@ int main(int argc, char *argv[]) {
     GLint location_rotMat2;
     GLint location_rotMat3;
     GLint location_rotMat4;
+    GLint location_rotMat5;
     GLint light_pos1;
     GLint light_pos2;
     GLint light_pos3;
     GLuint light_pos4;
     GLuint light_pos5;
+    GLuint light_pos6;
     GLint eye_pos1;
     GLint eye_pos2;
     GLint eye_pos3;
     GLuint eye_pos4;
     GLuint eye_pos5;
+    GLuint eye_pos6;
 
     //objects
     TriangleSoup sphere;
@@ -66,6 +71,7 @@ int main(int argc, char *argv[]) {
     TriangleSoup terrain;
     TriangleSoup clouds;
     TriangleSoup floating;
+    TriangleSoup tree;
 
     // time
     float time;  
@@ -103,20 +109,22 @@ int main(int argc, char *argv[]) {
     glfwMakeContextCurrent(window);
 
     // create shaders
-    sphereShader.createShader("sphereShaderVert.glsl", "sphereShaderFrag.glsl");
-    planeShader.createShader("planeShaderVert.glsl", "planeShaderFrag.glsl");
-    waterShader.createShader("waterShaderVert.glsl", "waterShaderFrag.glsl");
-    cloudShader.createShader("cloudShaderVert.glsl", "cloudShaderFrag.glsl");
-    floatingShader.createShader("floatingShaderVert.glsl", "floatingShaderFrag.glsl");
-
+    waterShader.createShader("shaders/waterShaderVert.glsl", "shaders/waterShaderFrag.glsl");
+    //waterShader.createShader("shaders/waterShaderVert.glsl", "shaders/waterShaderWorleyFrag.glsl");
+    sphereShader.createShader("shaders/sphereShaderVert.glsl", "shaders/sphereShaderFrag.glsl");
+    planeShader.createShader("shaders/planeShaderVert.glsl", "shaders/planeShaderFrag.glsl");
+    cloudShader.createShader("shaders/cloudShaderVert.glsl", "shaders/cloudShaderFrag.glsl");
+    floatingShader.createShader("shaders/floatingShaderVert.glsl", "shaders/floatingShaderFrag.glsl");
+    treeShader.createShader("shaders/treeShaderVert.glsl", "shaders/treeShaderFrag.glsl");
     // load objects
     sphere.createSphere(15, 40);
-    terrain.readOBJ("plane2.obj");
-    water.readOBJ("plane2.obj");
+    terrain.readOBJ("objects/plane2.obj");
+    water.readOBJ("objects/plane2.obj");
     clouds.createSphere(14.5, 40);
     floating.createSphere(0.2, 20);
+    tree.readOBJ("objects/Tree.obj");
 
-    // define light position
+    // define light positions
     float lightPos[3] = {-2.0, 5.0, 13.5};
 
     //camera
@@ -128,19 +136,23 @@ int main(int argc, char *argv[]) {
     glm::mat4 Model = glm::translate(glm::vec3(0, 0.0, 0));
     glm::mat4 sphereMVP;
 
-    glm::mat4 waterTrans = glm::translate(glm::vec3(0, -0.4, -8.0));
-    waterTrans += glm::scale(glm::vec3(3.0, 1.0, 1.5));
+    glm::mat4 waterTrans = glm::translate(glm::vec3(0, -0.6, 0.0));
+    waterTrans += glm::scale(glm::vec3(1.0, 1.0, 1.0));
     glm::mat4 waterMVP;
     
-    glm::mat4 planeTrans = glm::translate(glm::vec3(0, 0, 4.0));
-    planeTrans += glm::scale(glm::vec3(1.5, 1.0, 3.0));
+    glm::mat4 planeTrans = glm::translate(glm::vec3(0, 0, 3.0));
+    planeTrans += glm::scale(glm::vec3(20.0, 1.0, 20.0));
     glm::mat4 planeMVP;
 
     glm::mat4 cloudTrans = glm::translate(glm::vec3(0, 0.0, 0));
     glm::mat4 cloudMVP;
 
-    glm::mat4 floatingTrans = glm::translate(glm::vec3(0.0, 0.0, -4.0));
+    glm::mat4 floatingTrans = glm::translate(glm::vec3(2.0, 0.0, -4.0));
     glm::mat4 floatingMVP;
+
+    glm::mat4 treeTrans = glm::translate(glm::vec3(0.0, -0.4, 0.0));
+    treeTrans += glm::scale(glm::vec3(0.5, 0.5, 0.5));
+    glm::mat4 treeMVP;
 
     // set uniforms
     sphereID = glGetUniformLocation(sphereShader.programID, "MVP");
@@ -148,24 +160,27 @@ int main(int argc, char *argv[]) {
     waterID = glGetUniformLocation(waterShader.programID, "MVP");
     cloudID = glGetUniformLocation(cloudShader.programID, "MVP");
     floatingID = glGetUniformLocation(floatingShader.programID, "MVP");
+    treeID = glGetUniformLocation(treeShader.programID, "MVP");
 
     location_rotMat1 = glGetUniformLocation(sphereShader.programID, "rotMat");
     location_rotMat2 = glGetUniformLocation(planeShader.programID, "rotMat");
     location_rotMat3 = glGetUniformLocation(waterShader.programID, "rotMat");
     location_rotMat4 = glGetUniformLocation(floatingShader.programID, "rotMat");
-    //location_rotMat4 = glGetUniformLocation(cloudShader.programID, "rotMat");
+    location_rotMat5 = glGetUniformLocation(treeShader.programID, "rotMat");
 
     light_pos1 = glGetUniformLocation(sphereShader.programID, "lightPos");
     light_pos2 = glGetUniformLocation(planeShader.programID, "lightPos");
     light_pos3 = glGetUniformLocation(waterShader.programID, "lightPos");
     light_pos4 = glGetUniformLocation(cloudShader.programID, "lightPos");
     light_pos5 = glGetUniformLocation(floatingShader.programID, "lightPos");
+    light_pos6 = glGetUniformLocation(treeShader.programID, "lightPos");
 
     eye_pos1 = glGetUniformLocation(sphereShader.programID, "eyePosition");
     eye_pos2 = glGetUniformLocation(planeShader.programID, "eyePosition");
     eye_pos3 = glGetUniformLocation(waterShader.programID, "eyePosition");
     eye_pos4 = glGetUniformLocation(cloudShader.programID, "eyePosition");
     eye_pos5 = glGetUniformLocation(floatingShader.programID, "eyePosition");
+    eye_pos6 = glGetUniformLocation(treeShader.programID, "eyePosition");
 
     location_time1 = glGetUniformLocation(waterShader.programID, "time");
     location_time2 = glGetUniformLocation(cloudShader.programID, "time");
@@ -277,6 +292,16 @@ int main(int argc, char *argv[]) {
         glUniform3fv(eye_pos5, 1, glm::value_ptr(camera.getPos()));
         
         floating.render();
+        glUseProgram(0);
+
+        // draw tree
+        glUseProgram(treeShader.programID);
+        treeMVP = camera.getMVPMatrix(treeTrans);
+        glUniformMatrix4fv(treeID, 1, GL_FALSE, &treeMVP[0][0]);
+        glUniform3fv(light_pos6, 1, lightPos);
+        glUniform3fv(eye_pos6, 1, glm::value_ptr(camera.getPos()));
+        //glUniformMatrix4fv(location_rotMat3, 1, GL_FALSE, &rotMat[0][0]);
+        tree.render();
         glUseProgram(0);
 
         // draw clouds

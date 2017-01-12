@@ -1,25 +1,19 @@
 #version 330 core
 
-
-
-in vec3 pos;
-in vec3 interpolatedNormal;
-in vec2 st;
-
 uniform float time;
-uniform sampler2D tex;
-uniform mat4 rotMat;
 uniform vec3 lightPos;
 uniform vec3 eyePosition;
+uniform mat4 rotMat;
+uniform mat4 MVP;
 
-//vec3 lightPos = vec3(0.0, 4.0, 2.0);
+in vec3 interpolatedNormal;
+in vec2 st;
+in vec3 pos;
+
 vec3 LightColor = vec3(0.9,0.9,0.9);
-float LightPower = 100.0;
+float LightPower = 10.0;
 
-
-//out vec4 finalcolor;
 out vec4 color;
-
 
 // Authors : Ian McEwan, Ashima Arts and Stefan Gustavson, LiU.
 // noise functions
@@ -203,41 +197,24 @@ float snoise(vec3 v, out vec3 gradient)
   return 42.0 * dot(m4, pdotx);
 }
 
-// main
+
 void main () {
 
-	//vec4 light = vec4(1.0, 10.0, 0.0, 0.1);
-	vec4 light = vec4(lightPos, 1);
-	//light = light*rotMat;
-	vec3 colorBlue = vec3(0.0,0.2,0.8);
-	vec3 colorLightBlue = vec3(0.0, 0.5,0.9);
-	vec3 colorWhite = vec3(0.9, 0.9, 0.9);
+	vec4 mat = vec4(0.9, 0.9, 0.9, 1.0);// + vec4 (vec3(interpolatedNormal)*vec3(0,0,1), 1.0) ;
 
-	// Bump map surface
+	vec4 light = vec4(lightPos, 1);
+
 	vec3 grad = vec3(0.0); // To store gradient of noise
-	vec3 gradtemp = vec3(0.0); // Temporary gradient for fractal sum
-	float bump = 0.2 * snoise(2*pos, grad) + 0.5;
-	grad *= 0.4; // Scale gradient with inner derivative
-	bump += 0.5 * snoise(pos*4.0, gradtemp);
-	grad += 2.0 * gradtemp; // Same influence (double freq, half amp)
-	bump += 0.25 * snoise(pos*10.0, gradtemp);
-	grad += 4.0 * gradtemp; // Same influence (double freq, half amp)
-	
+	float bump = snoise(0.1*vec3(2.0*pos.x, 8.0*pos.y, pos.z), grad);
+	grad *= 0.16;
 	// Perturb normal
 	vec3 perturbation = grad - dot(grad, interpolatedNormal) * interpolatedNormal;
-	vec3 norm = interpolatedNormal -  0.2 * perturbation;
-
-  vec3 ballPos = vec3(0.0, 0.0, -0.4);
-  vec3 shadow = vec3(0.0,0.0,0.0);
-
-  // fake shadow
-  if( length(pos-ballPos) < 0.3)
-    shadow = vec3(0.9,0.9,0.9);
+	vec3 norm = interpolatedNormal -  0.0002 * perturbation;
 
 	// Material properties
-	vec3 MaterialDiffuseColor = mix(colorBlue, colorLightBlue, 0.5);
-	vec3 MaterialAmbientColor = vec3(0.5,0.5,0.5) * MaterialDiffuseColor;
-	vec3 MaterialSpecularColor = vec3(0.9,0.9,0.9);
+	vec3 MaterialDiffuseColor = vec3(mat);
+	vec3 MaterialAmbientColor = vec3(0.5, 0.5, 0.5) * MaterialDiffuseColor;
+	vec3 MaterialSpecularColor = vec3(0.9, 0.9, 0.9) * MaterialDiffuseColor;
 	
 	// Distance to the light
 	float distance = length(vec3(light) - pos);
@@ -245,7 +222,7 @@ void main () {
 	// Normal of the computed fragment, in camera space
 	vec3 n = normalize(norm);
 	// Direction of the light (from the fragment to the light)
-	vec3 l = normalize(vec3(light)-pos);
+	vec3 l = normalize(pos-vec3(light));
 	// Cosine of the angle between the normal and the light direction, 
 	float cosTheta = clamp( dot( n,l ), 0,1 );
 
@@ -255,12 +232,8 @@ void main () {
 	vec3 R = reflect(-l,n);
 	// Cosine of the angle between the Eye vector and the Reflect vector,
 	float cosAlpha = clamp( dot( E,R ), 0,1 );
-
-	color = vec4(vec3(MaterialAmbientColor
-  -shadow
+  
+	color = vec4(MaterialAmbientColor
 	+ MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance)
-	+ MaterialSpecularColor * 3.0 * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance)), 0.4);
-
-
-	//finalcolor = texture(tex, st) * vec4 (vec3(interpolatedNormal), 1.0);
+	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance), 0.02);
 }
