@@ -18,7 +18,7 @@ float delta = 0.1;
 vec4 getOffset(vec3 P) {
  	vec4 offset;
     vec3 grad;
-  	offset = vec4(0.0, sin(P.z - 2.0*time)/15.0 + cos(P.x + time)/25.0, 0.0, 0.0);
+  	offset = vec4(0.0, sin(P.z - 2.0*time)/20.0 + cos(P.x + time)/25.0, 0.0, 0.0);
   	return offset;
 }
 
@@ -26,7 +26,7 @@ void main () {
 
 	vec4 offset;
 
-	float delta = 0.07;
+	float delta = 0.09;
   	vec4 offX = getOffset(Position + vec3(delta, 0.0, 0.0));
   	vec4 offZ = getOffset(Position + vec3(0.0, 0.0, delta));
   	offset = getOffset(Position);

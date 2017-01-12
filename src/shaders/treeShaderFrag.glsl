@@ -19,7 +19,7 @@ void main () {
 	
 	vec4 mat;
 
-	if (abs(pos.x) <0.4 && pos.y < 2.0)
+	if (abs(pos.x) <0.4 && pos.y < 1.7)
 		mat = vec4(0.3, 0.2,0.01, 1.0);
 	else
 		mat = vec4(0.1, 0.3, 0.1, 1.0);

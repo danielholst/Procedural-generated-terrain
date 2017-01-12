@@ -109,9 +109,10 @@ int main(int argc, char *argv[]) {
     glfwMakeContextCurrent(window);
 
     // create shaders
+    waterShader.createShader("shaders/waterShaderVert.glsl", "shaders/waterShaderFrag.glsl");
+    //waterShader.createShader("shaders/waterShaderVert.glsl", "shaders/waterShaderWorleyFrag.glsl");
     sphereShader.createShader("shaders/sphereShaderVert.glsl", "shaders/sphereShaderFrag.glsl");
     planeShader.createShader("shaders/planeShaderVert.glsl", "shaders/planeShaderFrag.glsl");
-    waterShader.createShader("shaders/waterShaderVert.glsl", "shaders/waterShaderFrag.glsl");
     cloudShader.createShader("shaders/cloudShaderVert.glsl", "shaders/cloudShaderFrag.glsl");
     floatingShader.createShader("shaders/floatingShaderVert.glsl", "shaders/floatingShaderFrag.glsl");
     treeShader.createShader("shaders/treeShaderVert.glsl", "shaders/treeShaderFrag.glsl");
@@ -123,7 +124,7 @@ int main(int argc, char *argv[]) {
     floating.createSphere(0.2, 20);
     tree.readOBJ("objects/Tree.obj");
 
-    // define light position
+    // define light positions
     float lightPos[3] = {-2.0, 5.0, 13.5};
 
     //camera

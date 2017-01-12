@@ -203,16 +203,13 @@ void main () {
 	vec4 mat = vec4(0.9, 0.9, 0.9, 1.0);// + vec4 (vec3(interpolatedNormal)*vec3(0,0,1), 1.0) ;
 
 	vec4 light = vec4(lightPos, 1);
-	vec3 rainbow = vec3(0);
-	//light =  rotMat * light;
 
 	vec3 grad = vec3(0.0); // To store gradient of noise
-	vec3 gradtemp = vec3(0.0); // Temporary gradient for fractal sum
-	float bump =  20 * snoise(2*vec3(pos.x, pos.y*10, pos.z) + 0.4 * abs(sin(time)+1.0), grad) + 0.5;
-	grad *= 40;
+	float bump = snoise(0.1*vec3(2.0*pos.x, 8.0*pos.y, pos.z), grad);
+	grad *= 0.16;
 	// Perturb normal
 	vec3 perturbation = grad - dot(grad, interpolatedNormal) * interpolatedNormal;
-	vec3 norm = interpolatedNormal -  0.2 * perturbation;
+	vec3 norm = interpolatedNormal -  0.0002 * perturbation;
 
 	// Material properties
 	vec3 MaterialDiffuseColor = vec3(mat);
@@ -235,9 +232,8 @@ void main () {
 	vec3 R = reflect(-l,n);
 	// Cosine of the angle between the Eye vector and the Reflect vector,
 	float cosAlpha = clamp( dot( E,R ), 0,1 );
-
+  
 	color = vec4(MaterialAmbientColor
-	+ rainbow
 	+ MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance)
-	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance), 0.03);
+	+ MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance), 0.02);
 }
